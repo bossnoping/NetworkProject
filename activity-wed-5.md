@@ -4,4 +4,5 @@
 
 ได้เรียนรู้ระบบการทำงานของร้านร้าน การจัดปัญหาเฉพาะหน้า แนวคิวการปฎิบัติเผื่อให้เป็นไปตามแบบแผนของ ร้านจิ้มจุ่มวิทยาที่จัดโดยคณะวิทยาศาสตร์มหาลัยเกษตรศาสตร์
 
-![ภาพกิจกรรมวันที่ 5](https://github.com/cs113-672/${bossnoping}/blob/assets/images/activity-feb-5.jpg)
+![ภาพกิจกรรมวันที่ 5]([https://github.com/cs113-672/${bossnoping}/blob/assets/images/activity-feb-5.jpg](https://raw.githubusercontent.com/cs113-672/bossnoping/assets/images/activity-feb-5.jpg
+))
