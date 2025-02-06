@@ -2,10 +2,10 @@
 # git-assignment
 
 ## Student Info
-* รหัสนิสิต: 
-* ชื่อ: 
-* ชื่อเล่น: 
-* GitHub Username: 
+* รหัสนิสิต: 6710450899
+* ชื่อ: ทนุธรรม ปี่แก้ว
+* ชื่อเล่น: บอส
+* GitHub Username: bossnoping
 
 ## Tasks
 * [View Tasks in Notion](https://kasets.art/wRhX8H)
