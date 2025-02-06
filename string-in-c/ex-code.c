@@ -30,12 +30,6 @@ void demonstrateInput(void) {
     // Clear input buffer
     while (getchar() != '\n');
     
-    /* Commenting out gets() as it's unsafe
-    printf("Enter a string (gets): ");
-    gets(str);  // Unsafe, not recommended
-    printf("gets result: %s\n", str);
-    */
-    
     // fgets demonstration
     printf("Enter a string (fgets): ");
     fgets(str, sizeof(str), stdin);
