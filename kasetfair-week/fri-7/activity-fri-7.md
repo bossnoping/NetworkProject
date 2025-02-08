@@ -5,5 +5,5 @@
 ![grill-pork](https://github.com/user-attachments/assets/7ae8e98a-e1c0-410a-af19-62f56899e486)
 ![table-cleaning](https://github.com/user-attachments/assets/6c045cd8-4770-4371-b2fc-38c10a9b811b)
 
-(https://github.com/cs113-672/git-assignment-{bossnoping}/blob/assets/images/table-cleaning.jpg.jpg)
+(https://github.com/cs113-672/git-assignment-{bossnoping}/blob/assets/images/table-cleaning.jpg)
 (https://github.com/cs113-672/git-assignment-{bossnoping}/blob/assets/grill-pork.jpg)
