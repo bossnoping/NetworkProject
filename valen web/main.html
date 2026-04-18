@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Valentine's Day</title>
+    
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            background-color: black;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        h1 {
+            font-size: 2.5em;
+            color: rgb(255, 255, 255);
+            position: relative;
+            z-index: 2;
+        }
+        h2 {
+            font-size: 0.9em;
+            color: rgb(255, 255, 255);
+            position: center;
+            z-index: 100;
+            padding: 50px;
+            display: none;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            position: relative;
+            z-index: 2;
+        }
+        .sunflower {
+            width: 100px;
+            height: 100px;
+            opacity: 0;
+            transform: scale(0);
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+        }
+        .show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .background {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100vw;
+            height: 100vh;
+            background: url('https://i.pinimg.com/736x/cd/e9/16/cde9165c9e31604645df72239824dd5f.jpg') no-repeat center center/cover;
+            z-index: 1;
+        }
+        .button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 12px;
+            color: rgb(0, 0, 0);
+            background-color: rgb(255, 238, 0);
+            border: none;
+            cursor: pointer;
+            z-index: 3;
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <h1>Happy Valentine's Day</h1>
+    <div class="container">
+        <img class="sunflower" src="flower1.png" alt="Sunflower">
+        <img class="sunflower" src="ดาวน์โหลด.png" alt="Sunflower">
+        <img class="sunflower" src="ดาวน์โหลด (1).png" alt="Sunflower">
+    </div>
+    <button class="button" onclick="showText()">Click Me</button>
+    <h2 id="hiddenText">ถ้าวันวาเลนไทน์ปีนี้ไม่ได้ดอกไม้ อย่าเพิ่งรู้สึกเสียใจไปเลยนะ เพราะดอกไม้เป็นเพียงสัญลักษณ์เล็ก ๆ ของความรัก แต่มันไม่ได้วัดคุณค่าของเราหรือความรู้สึกที่แท้จริงจากใครสักคน
+        บางครั้งเราอาจจะโฟกัสกับสิ่งที่คนอื่นได้รับ จนลืมไปว่าความรักนั้นมีอยู่รอบตัวเราเสมอ ไม่ว่าจะเป็นความห่วงใยจากครอบครัว การสนับสนุนจากเพื่อน หรือแม้กระทั่งความรักที่เรามอบให้ตัวเอง อย่าปล่อยให้วันหนึ่งวันมาวัดคุณค่าของความรักในชีวิตเราเลย
+        ความรักที่แท้จริงไม่ได้ถูกจำกัดอยู่ในดอกไม้ การ์ด หรือของขวัญ แต่มันอยู่ในการใส่ใจ การห่วงใย และการยืนอยู่เคียงข้างกันในวันที่เราต้องการที่สุด หากวันนี้ไม่มีดอกไม้จากใคร ก็ลองหันกลับมามอบความรักและความชื่นชมให้กับตัวเองดูบ้าง เพราะบางครั้งคนที่เราลืมให้ความสำคัญมากที่สุดก็คือตัวเราเอง
+        อย่าลืมนะว่า ความสุขไม่ได้มาจากสิ่งที่เรามีหรือสิ่งที่คนอื่นมอบให้ แต่มาจากใจของเราที่รู้จักพอใจและรู้คุณค่าในตัวเอง ดอกไม้ไม่ใช่ตัวบ่งบอกความรัก ความห่วงใยต่างหากที่สำคัญที่สุด
+        หากวันนี้รู้สึกเหงาหรือโดดเดี่ยว ลองใช้เวลาทำสิ่งที่ตัวเองรัก ใช้เวลาพักผ่อน ดูหนัง ฟังเพลง หรือพูดคุยกับคนที่เราไว้ใจ เพราะความรักที่ดีที่สุด คือความรักที่เราให้กับตัวเองและคนที่เห็นคุณค่าของเราเสมอ
+        และจำไว้นะ ไม่จำเป็นต้องมีดอกไม้ในมือเพื่อจะรู้สึกมีคุณค่า เพราะคุณมีค่ามากกว่านั้นเสมอ ❤️
+    </h2>
+    <script>
+        function showText() {
+            document.getElementById("hiddenText").style.display = "block";
+        }
+        window.onload = () => {
+            const sunflowers = document.querySelectorAll('.sunflower');
+            sunflowers.forEach((flower, index) => {
+                setTimeout(() => {
+                    flower.classList.add('show');
+                }, index * 500);
+            });
+        };
+    </script>
+</body>
+</html>
