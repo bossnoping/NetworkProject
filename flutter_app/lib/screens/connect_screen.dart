@@ -38,9 +38,9 @@ class _ConnectScreenState extends State<ConnectScreen> {
     setState(() => _connecting = false);
 
     if (ok) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const DashboardScreen()));
     } else {
       setState(
         () => _errorMsg =
@@ -92,10 +92,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
                       const SizedBox(height: 6),
                       Text(
                         'Enter the IP address of your PC running srmp_server.py',
-                        style: GoogleFonts.inter(
-                          color: Colors.white38,
-                          fontSize: 13,
-                        ),
+                        style: GoogleFonts.inter(color: Colors.white38, fontSize: 13),
                       ),
                       const SizedBox(height: 24),
 
@@ -109,9 +106,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
                           decoration: BoxDecoration(
                             color: const Color(0xFFFF1744).withOpacity(0.1),
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: const Color(0xFFFF1744).withOpacity(0.4),
-                            ),
+                            border: Border.all(color: const Color(0xFFFF1744).withOpacity(0.4)),
                           ),
                           child: Row(
                             children: [
@@ -124,10 +119,7 @@ class _ConnectScreenState extends State<ConnectScreen> {
                               Expanded(
                                 child: Text(
                                   _errorMsg!,
-                                  style: const TextStyle(
-                                    color: Color(0xFFFF1744),
-                                    fontSize: 12,
-                                  ),
+                                  style: const TextStyle(color: Color(0xFFFF1744), fontSize: 12),
                                 ),
                               ),
                             ],
@@ -191,11 +183,7 @@ class _LogoSection extends StatelessWidget {
               ),
             ],
           ),
-          child: const Icon(
-            Icons.monitor_heart_rounded,
-            color: Colors.white,
-            size: 40,
-          ),
+          child: const Icon(Icons.monitor_heart_rounded, color: Colors.white, size: 40),
         ),
         const SizedBox(height: 20),
         Text(
@@ -226,11 +214,7 @@ class _IpField extends StatelessWidget {
     return TextField(
       controller: controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      style: GoogleFonts.robotoMono(
-        color: Colors.white,
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-      ),
+      style: GoogleFonts.robotoMono(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
       decoration: InputDecoration(
         labelText: 'Server IP Address',
         labelStyle: const TextStyle(color: Colors.white38),
@@ -298,11 +282,7 @@ class _ConnectButtonState extends State<_ConnectButton> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.wifi_tethering_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
+              const Icon(Icons.wifi_tethering_rounded, color: Colors.white, size: 20),
               const SizedBox(width: 10),
               Text(
                 'Connect',
@@ -345,16 +325,8 @@ class _ProtocolInfo extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          _InfoRow(
-            icon: Icons.radio_rounded,
-            label: 'UDP :9000',
-            desc: 'Metric streaming (500ms)',
-          ),
-          _InfoRow(
-            icon: Icons.cable_rounded,
-            label: 'TCP :9001',
-            desc: 'Command & control',
-          ),
+          _InfoRow(icon: Icons.radio_rounded, label: 'UDP :9000', desc: 'Metric streaming (500ms)'),
+          _InfoRow(icon: Icons.cable_rounded, label: 'TCP :9001', desc: 'Command & control'),
         ],
       ),
     );

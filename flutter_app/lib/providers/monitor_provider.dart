@@ -69,7 +69,7 @@ class MonitorProvider extends ChangeNotifier {
           );
           await HomeWidget.saveWidgetData<String>(
             'status',
-            metric.netOnline ? 'Online' : 'Offline',
+            isConnected ? 'ONLINE' : 'OFFLINE',
           );
           await HomeWidget.updateWidget(
             androidName: 'AppWidgetProvider',
@@ -89,6 +89,11 @@ class MonitorProvider extends ChangeNotifier {
     }
 
     isConnected = true;
+    if (Platform.isAndroid || Platform.isIOS) {
+      await HomeWidget.saveWidgetData<String>('server_host', host);
+      await HomeWidget.saveWidgetData<String>('status', 'ONLINE');
+      await HomeWidget.updateWidget(androidName: 'AppWidgetProvider');
+    }
     _log('Connected to $host');
     notifyListeners();
 
@@ -166,6 +171,10 @@ class MonitorProvider extends ChangeNotifier {
     await _udp.stop();
     await _tcp.disconnect();
     isConnected = false;
+    if (Platform.isAndroid || Platform.isIOS) {
+      await HomeWidget.saveWidgetData<String>('status', 'OFFLINE');
+      await HomeWidget.updateWidget(androidName: 'AppWidgetProvider');
+    }
     latestMetric = null;
     processes = [];
     alerts = [];
@@ -220,6 +229,9 @@ class MonitorProvider extends ChangeNotifier {
   void setVolume(int level) {
     _tcp.setVolume(level);
     currentVolume = level;
+    if (Platform.isAndroid || Platform.isIOS) {
+      unawaited(HomeWidget.saveWidgetData<String>('volume', '$level'));
+    }
     controlResult = null; // clear while waiting for response
     notifyListeners();
   }
@@ -227,6 +239,9 @@ class MonitorProvider extends ChangeNotifier {
   void setBrightness(int level) {
     _tcp.setBrightness(level);
     currentBrightness = level;
+    if (Platform.isAndroid || Platform.isIOS) {
+      unawaited(HomeWidget.saveWidgetData<String>('brightness', '$level'));
+    }
     controlResult = null;
     notifyListeners();
   }
@@ -235,6 +250,16 @@ class MonitorProvider extends ChangeNotifier {
     _tcp.sysPower(action);
     controlResult = null;
     _log('SYS_POWER action=$action sent');
+  }
+
+  Future<bool> wakePc(String macAddress) async {
+    final sent = await UDPService.wakeOnLan(macAddress);
+    controlResult = sent
+        ? '✅ Wake-on-LAN packet sent'
+        : '❌ Invalid MAC address or packet could not be sent';
+    _log(sent ? 'Wake-on-LAN sent to $macAddress' : 'Wake-on-LAN failed');
+    notifyListeners();
+    return sent;
   }
 
   void clearControlResult() {
