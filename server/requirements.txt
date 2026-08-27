@@ -1,0 +1,4 @@
+psutil
+pycaw
+wmi
+pythonnet
