@@ -42,13 +42,15 @@ class _ConnectScreenState extends State<ConnectScreen> {
         MaterialPageRoute(builder: (_) => const DashboardScreen()),
       );
     } else {
-      setState(() => _errorMsg =
-          'ไม่สามารถเชื่อมต่อ $host:9001 ได้\n\n'
-          '✅ ตรวจสอบ:\n'
-          '• รัน python srmp_server.py บน PC แล้วหรือยัง?\n'
-          '• IP ครบไหม? เช่น 192.168.1.4 (ดูจาก server console)\n'
-          '• PC กับโทรศัพท์อยู่ WiFi เดียวกันไหม?\n'
-          '• Windows Firewall → Allow Python on port 9001');
+      setState(
+        () => _errorMsg =
+            'ไม่สามารถเชื่อมต่อ $host:9001 ได้\n\n'
+            '✅ ตรวจสอบ:\n'
+            '• รัน python srmp_server.py บน PC แล้วหรือยัง?\n'
+            '• IP ครบไหม? เช่น 192.168.1.4 (ดูจาก server console)\n'
+            '• PC กับโทรศัพท์อยู่ WiFi เดียวกันไหม?\n'
+            '• Windows Firewall → Allow Python on port 9001',
+      );
     }
   }
 
@@ -105,24 +107,27 @@ class _ConnectScreenState extends State<ConnectScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color:
-                                const Color(0xFFFF1744).withOpacity(0.1),
+                            color: const Color(0xFFFF1744).withOpacity(0.1),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                                color: const Color(0xFFFF1744)
-                                    .withOpacity(0.4)),
+                              color: const Color(0xFFFF1744).withOpacity(0.4),
+                            ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error_outline_rounded,
-                                  color: Color(0xFFFF1744), size: 16),
+                              const Icon(
+                                Icons.error_outline_rounded,
+                                color: Color(0xFFFF1744),
+                                size: 16,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   _errorMsg!,
                                   style: const TextStyle(
-                                      color: Color(0xFFFF1744),
-                                      fontSize: 12),
+                                    color: Color(0xFFFF1744),
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ),
                             ],
@@ -186,8 +191,11 @@ class _LogoSection extends StatelessWidget {
               ),
             ],
           ),
-          child: const Icon(Icons.monitor_heart_rounded,
-              color: Colors.white, size: 40),
+          child: const Icon(
+            Icons.monitor_heart_rounded,
+            color: Colors.white,
+            size: 40,
+          ),
         ),
         const SizedBox(height: 20),
         Text(
@@ -202,10 +210,7 @@ class _LogoSection extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           'System Resource Monitoring Protocol',
-          style: GoogleFonts.inter(
-            color: Colors.white38,
-            fontSize: 13,
-          ),
+          style: GoogleFonts.inter(color: Colors.white38, fontSize: 13),
         ),
       ],
     );
@@ -222,15 +227,16 @@ class _IpField extends StatelessWidget {
       controller: controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       style: GoogleFonts.robotoMono(
-          color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+      ),
       decoration: InputDecoration(
         labelText: 'Server IP Address',
         labelStyle: const TextStyle(color: Colors.white38),
         hintText: '192.168.x.x',
-        hintStyle:
-            GoogleFonts.robotoMono(color: Colors.white24, fontSize: 14),
-        prefixIcon:
-            const Icon(Icons.dns_rounded, color: Color(0xFF00B4D8)),
+        hintStyle: GoogleFonts.robotoMono(color: Colors.white24, fontSize: 14),
+        prefixIcon: const Icon(Icons.dns_rounded, color: Color(0xFF00B4D8)),
         filled: true,
         fillColor: Colors.white.withOpacity(0.05),
         border: OutlineInputBorder(
@@ -243,8 +249,7 @@ class _IpField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-              const BorderSide(color: Color(0xFF00B4D8), width: 1.5),
+          borderSide: const BorderSide(color: Color(0xFF00B4D8), width: 1.5),
         ),
       ),
     );
@@ -286,15 +291,18 @@ class _ConnectButtonState extends State<_ConnectButton> {
                       color: const Color(0xFF00B4D8).withOpacity(0.4),
                       blurRadius: 20,
                       offset: const Offset(0, 6),
-                    )
+                    ),
                   ]
                 : [],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.wifi_tethering_rounded,
-                  color: Colors.white, size: 20),
+              const Icon(
+                Icons.wifi_tethering_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
               const SizedBox(width: 10),
               Text(
                 'Connect',
@@ -338,13 +346,15 @@ class _ProtocolInfo extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           _InfoRow(
-              icon: Icons.radio_rounded,
-              label: 'UDP :9000',
-              desc: 'Metric streaming (500ms)'),
+            icon: Icons.radio_rounded,
+            label: 'UDP :9000',
+            desc: 'Metric streaming (500ms)',
+          ),
           _InfoRow(
-              icon: Icons.cable_rounded,
-              label: 'TCP :9001',
-              desc: 'Command & control'),
+            icon: Icons.cable_rounded,
+            label: 'TCP :9001',
+            desc: 'Command & control',
+          ),
         ],
       ),
     );
@@ -356,8 +366,7 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final String desc;
 
-  const _InfoRow(
-      {required this.icon, required this.label, required this.desc});
+  const _InfoRow({required this.icon, required this.label, required this.desc});
 
   @override
   Widget build(BuildContext context) {
@@ -367,14 +376,23 @@ class _InfoRow extends StatelessWidget {
         children: [
           Icon(icon, size: 14, color: const Color(0xFF00B4D8)),
           const SizedBox(width: 8),
-          Text(label,
-              style: GoogleFonts.robotoMono(
-                  color: const Color(0xFF00B4D8),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            style: GoogleFonts.robotoMono(
+              color: const Color(0xFF00B4D8),
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(width: 8),
-          Text(desc,
-              style: const TextStyle(color: Colors.white38, fontSize: 11)),
+          Expanded(
+            child: Text(
+              desc,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white38, fontSize: 11),
+            ),
+          ),
         ],
       ),
     );

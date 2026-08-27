@@ -20,13 +20,15 @@ class ServerResponse {
   });
 
   static ServerResponse? parse(String line) {
-    final match = RegExp(r'^(\d{3}) ([A-Z ]+) - (.+)$').firstMatch(line.trim());
+    final match = RegExp(
+      r'^(\d{3}) ([A-Z_ ]+)(?: - (.*))?$',
+    ).firstMatch(line.trim());
     if (match == null) return null;
     final code = int.tryParse(match.group(1)!) ?? 0;
     return ServerResponse(
       statusCode: code,
       phrase: match.group(2)!.trim(),
-      body: match.group(3)!,
+      body: match.group(3) ?? '',
       isAlert: code == 202,
     );
   }
@@ -41,8 +43,7 @@ class TCPService {
   static const int _tcpPort = 9001;
 
   Socket? _socket;
-  final _responseController =
-      StreamController<ServerResponse>.broadcast();
+  final _responseController = StreamController<ServerResponse>.broadcast();
   final _connectedController = StreamController<bool>.broadcast();
 
   Stream<ServerResponse> get responses => _responseController.stream;
@@ -56,8 +57,11 @@ class TCPService {
   /// Connect to SRMP TCP server at [host].
   Future<bool> connect(String host) async {
     try {
-      _socket = await Socket.connect(host, _tcpPort,
-          timeout: const Duration(seconds: 10));
+      _socket = await Socket.connect(
+        host,
+        _tcpPort,
+        timeout: const Duration(seconds: 10),
+      );
       _connected = true;
       _connectedController.add(true);
 
@@ -110,13 +114,13 @@ class TCPService {
   bool _fetchingProcs = false;
 
   /// Request top processes sorted by [sortby] ('CPU' or 'RAM').
-  Future<List<ProcessInfo>> getTopProcesses(
-      {int limit = 8, String sortby = 'CPU'}) async {
+  Future<List<ProcessInfo>> getTopProcesses({
+    int limit = 8,
+    String sortby = 'CPU',
+  }) async {
     // Skip if a request is already in flight
     if (_fetchingProcs) return [];
     _fetchingProcs = true;
-
-    sendCommand('GET_TOP_PROCS limit=$limit sortby=$sortby');
 
     try {
       // Use a Completer so only THIS call captures the next procs= response
@@ -129,11 +133,16 @@ class TCPService {
         }
       });
 
-      final result = await completer.future
-          .timeout(const Duration(seconds: 5), onTimeout: () {
-        sub.cancel();
-        return [];
-      });
+      // Subscribe before sending because the server may respond immediately.
+      sendCommand('GET_TOP_PROCS limit=$limit sortby=$sortby');
+
+      final result = await completer.future.timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          sub.cancel();
+          return [];
+        },
+      );
       return result;
     } catch (_) {
       return [];
@@ -142,9 +151,9 @@ class TCPService {
     }
   }
 
-  /// Send a KILL_PROC command.
-  void killProcess(String name) {
-    sendCommand('KILL_PROC name=$name');
+  /// Send a KILL_PROC command for a process id.
+  void killProcess(int pid) {
+    sendCommand('KILL_PROC pid=$pid');
   }
 
   /// Set master volume (0–100).
@@ -165,7 +174,6 @@ class TCPService {
   /// Get a system setting by name ('volume' or 'brightness').
   /// Returns the integer value, or -1 on failure/timeout.
   Future<int> getSetting(String name) async {
-    sendCommand('GET_SETTING name=$name');
     final completer = Completer<int>();
     late StreamSubscription<ServerResponse> sub;
     sub = responses.listen((r) {
@@ -180,9 +188,16 @@ class TCPService {
         sub.cancel();
       }
     });
+
+    // Subscribe before sending because the server may respond immediately.
+    sendCommand('GET_SETTING name=$name');
+
     return completer.future.timeout(
       const Duration(seconds: 5),
-      onTimeout: () { sub.cancel(); return -1; },
+      onTimeout: () {
+        sub.cancel();
+        return -1;
+      },
     );
   }
 
