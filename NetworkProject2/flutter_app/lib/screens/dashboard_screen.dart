@@ -973,6 +973,16 @@ class _ControlPanelState extends State<_ControlPanel> {
           ),
           const SizedBox(height: 12),
 
+          // Wake-on-LAN works while the PC is powered off.
+          _PowerButton(
+            icon: Icons.wb_sunny_rounded,
+            label: 'Wake PC',
+            subtitle: 'Power on the PC using Wake-on-LAN',
+            color: const Color(0xFFFFD600),
+            onTap: () => _showWakeDialog(context, monitor),
+          ),
+          const SizedBox(height: 8),
+
           // Lock
           _PowerButton(
             icon: Icons.lock_rounded,
@@ -1072,6 +1082,43 @@ class _ControlPanelState extends State<_ControlPanel> {
         ],
       ),
     );
+  }
+
+  void _showWakeDialog(BuildContext context, MonitorProvider monitor) {
+    final macController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xFF141828),
+        title: const Text('Wake PC', style: TextStyle(color: Colors.white)),
+        content: TextField(
+          controller: macController,
+          autofocus: true,
+          keyboardType: TextInputType.text,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(
+            labelText: 'PC MAC address',
+            hintText: 'AA:BB:CC:DD:EE:FF',
+            labelStyle: TextStyle(color: Colors.white70),
+            hintStyle: TextStyle(color: Colors.white30),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final mac = macController.text.trim();
+              Navigator.pop(dialogContext);
+              monitor.wakePc(mac);
+            },
+            child: const Text('Wake'),
+          ),
+        ],
+      ),
+    ).then((_) => macController.dispose());
   }
 }
 
