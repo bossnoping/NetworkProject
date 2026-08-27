@@ -38,8 +38,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 await monitor.disconnect();
                 if (context.mounted) {
                   Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                        builder: (_) => const ConnectScreen()),
+                    MaterialPageRoute(builder: (_) => const ConnectScreen()),
                   );
                 }
               },
@@ -48,16 +47,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
             // ── Alert Banners ─────────────────────────────────────────────
             if (monitor.alerts.isNotEmpty)
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 child: Column(
                   children: monitor.alerts
                       .asMap()
                       .entries
-                      .map((e) => AlertBanner(
-                            message: e.value,
-                            onDismiss: () => monitor.dismissAlert(e.key),
-                          ))
+                      .map(
+                        (e) => AlertBanner(
+                          message: e.value,
+                          onDismiss: () => monitor.dismissAlert(e.key),
+                        ),
+                      )
                       .toList(),
                 ),
               ),
@@ -67,13 +70,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: _selectedIndex == 0
                   ? _LeftPanel(metric: metric, monitor: monitor)
                   : _selectedIndex == 1
-                      ? _ProcessPanel(
-                          monitor: monitor,
-                          sortby: monitor.currentSortby,
-                          onSortChange: (v) =>
-                              monitor.refreshProcesses(sortby: v),
-                        )
-                      : _ControlPanel(monitor: monitor),
+                  ? _ProcessPanel(
+                      monitor: monitor,
+                      sortby: monitor.currentSortby,
+                      onSortChange: (v) => monitor.refreshProcesses(sortby: v),
+                    )
+                  : _ControlPanel(monitor: monitor),
             ),
           ],
         ),
@@ -113,17 +115,20 @@ class _TopBar extends StatelessWidget {
   final bool isConnected;
   final VoidCallback onDisconnect;
 
-  const _TopBar(
-      {required this.host,
-      required this.isConnected,
-      required this.onDisconnect});
+  const _TopBar({
+    required this.host,
+    required this.isConnected,
+    required this.onDisconnect,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.07))),
+        border: Border(
+          bottom: BorderSide(color: Colors.white.withOpacity(0.07)),
+        ),
       ),
       child: Row(
         children: [
@@ -135,8 +140,11 @@ class _TopBar extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(10),
             ),
-            child:
-                const Icon(Icons.monitor_heart_rounded, color: Colors.white, size: 18),
+            child: const Icon(
+              Icons.monitor_heart_rounded,
+              color: Colors.white,
+              size: 18,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -166,7 +174,10 @@ class _TopBar extends StatelessWidget {
                     const SizedBox(width: 5),
                     Text(
                       isConnected ? host : 'Disconnected',
-                      style: const TextStyle(color: Colors.white38, fontSize: 11),
+                      style: const TextStyle(
+                        color: Colors.white38,
+                        fontSize: 11,
+                      ),
                     ),
                   ],
                 ),
@@ -174,8 +185,11 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.power_settings_new_rounded,
-                color: Colors.white38, size: 20),
+            icon: const Icon(
+              Icons.power_settings_new_rounded,
+              color: Colors.white38,
+              size: 20,
+            ),
             onPressed: onDisconnect,
             tooltip: 'Disconnect',
           ),
@@ -202,21 +216,9 @@ class _LeftPanel extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              GaugeWidget(
-                value: metric?.cpu ?? 0,
-                label: 'CPU',
-                size: 110,
-              ),
-              GaugeWidget(
-                value: metric?.ram ?? 0,
-                label: 'RAM',
-                size: 110,
-              ),
-              GaugeWidget(
-                value: metric?.disk ?? 0,
-                label: 'Disk',
-                size: 110,
-              ),
+              GaugeWidget(value: metric?.cpu ?? 0, label: 'CPU', size: 110),
+              GaugeWidget(value: metric?.ram ?? 0, label: 'RAM', size: 110),
+              GaugeWidget(value: metric?.disk ?? 0, label: 'Disk', size: 110),
             ],
           ),
           const SizedBox(height: 16),
@@ -230,17 +232,17 @@ class _LeftPanel extends StatelessWidget {
                   label: 'CPU Temp',
                   value: metric != null
                       ? (metric.tempCpu > 0
-                          ? '${metric.tempCpu.toStringAsFixed(0)}°C'
-                          : 'Req Admin')
+                            ? '${metric.tempCpu.toStringAsFixed(0)}°C'
+                            : 'Unavailable')
                       : '—',
                   subValue: metric != null && metric.tempCpu == 0
-                      ? 'Run as Admin'
+                      ? 'No temperature sensor'
                       : null,
                   color: metric != null && metric.tempCpu > 80
                       ? const Color(0xFFFF1744)
                       : (metric != null && metric.tempCpu > 0
-                          ? const Color(0xFFFF6D00)
-                          : const Color(0xFF9E9E9E)),
+                            ? const Color(0xFFFF6D00)
+                            : const Color(0xFF9E9E9E)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -250,8 +252,8 @@ class _LeftPanel extends StatelessWidget {
                   label: 'GPU Temp',
                   value: metric != null
                       ? (metric.tempGpu > 0
-                          ? '${metric.tempGpu.toStringAsFixed(0)}°C'
-                          : '—')
+                            ? '${metric.tempGpu.toStringAsFixed(0)}°C'
+                            : '—')
                       : '—',
                   subValue: metric != null && metric.tempGpu > 0
                       ? 'RTX 4060'
@@ -276,16 +278,16 @@ class _LeftPanel extends StatelessWidget {
                   label: 'Server Ping',
                   value: metric != null
                       ? (metric.netOnline
-                          ? (metric.netPing > 0
-                              ? '${metric.netPing}ms'
-                              : '<1ms')
-                          : 'Offline')
+                            ? (metric.netPing > 0
+                                  ? '${metric.netPing}ms'
+                                  : '<1ms')
+                            : 'Offline')
                       : '—',
                   subValue: 'Server → 8.8.8.8',
                   color: metric != null && metric.netOnline
                       ? (metric.netPing > 100
-                          ? const Color(0xFFFF6D00)
-                          : const Color(0xFF00E676))
+                            ? const Color(0xFFFF6D00)
+                            : const Color(0xFF00E676))
                       : const Color(0xFFFF1744),
                 ),
               ),
@@ -301,8 +303,8 @@ class _LeftPanel extends StatelessWidget {
                   color: monitor.clientPingMs < 0
                       ? const Color(0xFF9E9E9E)
                       : (monitor.clientPingMs > 100
-                          ? const Color(0xFFFF6D00)
-                          : const Color(0xFF00B4D8)),
+                            ? const Color(0xFFFF6D00)
+                            : const Color(0xFF00B4D8)),
                 ),
               ),
             ],
@@ -388,15 +390,19 @@ class _StatCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(label,
-                    style: const TextStyle(
-                        color: Colors.white38, fontSize: 10)),
+                Text(
+                  label,
+                  style: const TextStyle(color: Colors.white38, fontSize: 10),
+                ),
                 const SizedBox(height: 1),
-                Text(value,
-                    style: TextStyle(
-                        color: color,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700)),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 if (subValue != null) ...[
                   const SizedBox(height: 2),
                   Text(
@@ -447,15 +453,20 @@ class _EventLog extends StatelessWidget {
           Expanded(
             child: events.isEmpty
                 ? const Center(
-                    child: Text('No events yet',
-                        style: TextStyle(color: Colors.white24, fontSize: 11)))
+                    child: Text(
+                      'No events yet',
+                      style: TextStyle(color: Colors.white24, fontSize: 11),
+                    ),
+                  )
                 : ListView.builder(
                     reverse: false,
                     itemCount: events.length,
                     itemBuilder: (_, i) => Text(
                       events[i],
                       style: GoogleFonts.robotoMono(
-                          color: Colors.white54, fontSize: 10),
+                        color: Colors.white54,
+                        fontSize: 10,
+                      ),
                     ),
                   ),
           ),
@@ -486,8 +497,11 @@ class _ProcessPanel extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Row(
             children: [
-              const Icon(Icons.list_alt_rounded,
-                  color: Color(0xFF00B4D8), size: 18),
+              const Icon(
+                Icons.list_alt_rounded,
+                color: Color(0xFF00B4D8),
+                size: 18,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Top Processes',
@@ -498,7 +512,7 @@ class _ProcessPanel extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              _LiveBadge(),   // 🔴 LIVE indicator
+              _LiveBadge(), // 🔴 LIVE indicator
               const Spacer(),
 
               // Sort toggle
@@ -513,10 +527,15 @@ class _ProcessPanel extends StatelessWidget {
                         width: 16,
                         height: 16,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Color(0xFF00B4D8)))
-                    : const Icon(Icons.refresh_rounded,
-                        color: Color(0xFF00B4D8), size: 20),
+                          strokeWidth: 2,
+                          color: Color(0xFF00B4D8),
+                        ),
+                      )
+                    : const Icon(
+                        Icons.refresh_rounded,
+                        color: Color(0xFF00B4D8),
+                        size: 20,
+                      ),
                 onPressed: () => monitor.refreshProcesses(sortby: sortby),
               ),
             ],
@@ -530,18 +549,27 @@ class _ProcessPanel extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.hourglass_empty_rounded,
-                          color: Colors.white24, size: 36),
+                      Icon(
+                        Icons.hourglass_empty_rounded,
+                        color: Colors.white24,
+                        size: 36,
+                      ),
                       const SizedBox(height: 8),
-                      Text('Loading processes...',
-                          style: const TextStyle(
-                              color: Colors.white24, fontSize: 12)),
+                      Text(
+                        'Loading processes...',
+                        style: const TextStyle(
+                          color: Colors.white24,
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                   ),
                 )
               : ListView.builder(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
                   itemCount: monitor.processes.length,
                   itemBuilder: (_, i) {
                     final proc = monitor.processes[i];
@@ -553,7 +581,8 @@ class _ProcessPanel extends StatelessWidget {
                           builder: (_) => _KillConfirmDialog(
                             processName: proc.name,
                             pid: proc.pid,
-                            onConfirm: () => monitor.killProcess(proc.pid, proc.name),
+                            onConfirm: () =>
+                                monitor.killProcess(proc.pid, proc.name),
                           ),
                         );
                       },
@@ -574,10 +603,7 @@ class _SortToggle extends StatelessWidget {
   final String current;
   final ValueChanged<String> onChanged;
 
-  const _SortToggle({
-    required this.current,
-    required this.onChanged,
-  });
+  const _SortToggle({required this.current, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -599,8 +625,7 @@ class _SortToggle extends StatelessWidget {
             },
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: active
                     ? const Color(0xFF00B4D8).withOpacity(0.2)
@@ -610,9 +635,7 @@ class _SortToggle extends StatelessWidget {
               child: Text(
                 s,
                 style: TextStyle(
-                  color: active
-                      ? const Color(0xFF00B4D8)
-                      : Colors.white38,
+                  color: active ? const Color(0xFF00B4D8) : Colors.white38,
                   fontSize: 12,
                   fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                 ),
@@ -640,15 +663,15 @@ class _KillConfirmDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: const Color(0xFF141828),
-      shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: const Row(
         children: [
-          Icon(Icons.warning_amber_rounded,
-              color: Color(0xFFFF6D00), size: 22),
+          Icon(Icons.warning_amber_rounded, color: Color(0xFFFF6D00), size: 22),
           SizedBox(width: 8),
-          Text('Kill Process',
-              style: TextStyle(color: Colors.white, fontSize: 18)),
+          Text(
+            'Kill Process',
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
         ],
       ),
       content: Text(
@@ -658,22 +681,23 @@ class _KillConfirmDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel',
-              style: TextStyle(color: Colors.white38)),
+          child: const Text('Cancel', style: TextStyle(color: Colors.white38)),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFFF1744),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
           onPressed: () {
             Navigator.pop(context);
             onConfirm();
           },
-          child: const Text('Kill Task',
-              style: TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.w700)),
+          child: const Text(
+            'Kill Task',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
         ),
       ],
     );
@@ -687,8 +711,7 @@ class _KillResultBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isOk = message.startsWith('✅');
-    final color =
-        isOk ? const Color(0xFF00E676) : const Color(0xFFFF1744);
+    final color = isOk ? const Color(0xFF00E676) : const Color(0xFFFF1744);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -696,7 +719,10 @@ class _KillResultBar extends StatelessWidget {
       child: Text(
         message,
         style: TextStyle(
-            color: color, fontSize: 12, fontWeight: FontWeight.w600),
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -719,12 +745,14 @@ class _LiveBadgeState extends State<_LiveBadge>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 900),
-        reverseDuration: const Duration(milliseconds: 900))
-      ..repeat(reverse: true);
-    _opacity = Tween<double>(begin: 0.3, end: 1.0)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+      reverseDuration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+    _opacity = Tween<double>(
+      begin: 0.3,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -743,7 +771,9 @@ class _LiveBadgeState extends State<_LiveBadge>
           color: const Color(0xFFFF1744).withOpacity(0.15),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-              color: const Color(0xFFFF1744).withOpacity(0.5), width: 1),
+            color: const Color(0xFFFF1744).withOpacity(0.5),
+            width: 1,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -783,14 +813,20 @@ class _ControlPanel extends StatefulWidget {
 }
 
 class _ControlPanelState extends State<_ControlPanel> {
-  double? _localVolume;       // local state while dragging
-  double? _localBrightness;  // local state while dragging
+  double? _localVolume; // local state while dragging
+  double? _localBrightness; // local state while dragging
 
   @override
   Widget build(BuildContext context) {
     final monitor = widget.monitor;
-    final vol = _localVolume ?? (monitor.currentVolume >= 0 ? monitor.currentVolume.toDouble() : 50.0);
-    final bright = _localBrightness ?? (monitor.currentBrightness >= 0 ? monitor.currentBrightness.toDouble() : 50.0);
+    final vol =
+        _localVolume ??
+        (monitor.currentVolume >= 0 ? monitor.currentVolume.toDouble() : 50.0);
+    final bright =
+        _localBrightness ??
+        (monitor.currentBrightness >= 0
+            ? monitor.currentBrightness.toDouble()
+            : 50.0);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -798,12 +834,24 @@ class _ControlPanelState extends State<_ControlPanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Header ──────────────────────────────────────────────────────
-          Row(children: [
-            const Icon(Icons.tune_rounded, color: Color(0xFF00B4D8), size: 18),
-            const SizedBox(width: 8),
-            Text('Remote Controls', style: GoogleFonts.inter(
-              color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
-          ]),
+          Row(
+            children: [
+              const Icon(
+                Icons.tune_rounded,
+                color: Color(0xFF00B4D8),
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Remote Controls',
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
 
           // ── Result Banner ────────────────────────────────────────────────
           if (monitor.controlResult != null) ...[
@@ -813,7 +861,10 @@ class _ControlPanelState extends State<_ControlPanel> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: monitor.controlResult!.startsWith('✅')
                       ? const Color(0xFF00E676).withOpacity(0.12)
@@ -849,8 +900,7 @@ class _ControlPanelState extends State<_ControlPanel> {
                         ),
                       ),
                     ),
-                    Icon(Icons.close_rounded,
-                        color: Colors.white24, size: 14),
+                    Icon(Icons.close_rounded, color: Colors.white24, size: 14),
                   ],
                 ),
               ),
@@ -859,14 +909,18 @@ class _ControlPanelState extends State<_ControlPanel> {
           const SizedBox(height: 20),
 
           // ── Volume ───────────────────────────────────────────────────────
-          _SectionHeader(icon: Icons.volume_up_rounded, label: 'System Volume',
-              value: monitor.currentVolume >= 0 ? '${vol.round()}%' : '—',
-              color: const Color(0xFF00E676)),
+          _SectionHeader(
+            icon: Icons.volume_up_rounded,
+            label: 'System Volume',
+            value: monitor.currentVolume >= 0 ? '${vol.round()}%' : '—',
+            color: const Color(0xFF00E676),
+          ),
           const SizedBox(height: 8),
           _SliderCard(
             value: vol,
             color: const Color(0xFF00E676),
-            min: 0, max: 100,
+            min: 0,
+            max: 100,
             onChanged: (v) => setState(() => _localVolume = v),
             onChangeEnd: (v) {
               setState(() => _localVolume = null);
@@ -876,14 +930,20 @@ class _ControlPanelState extends State<_ControlPanel> {
           const SizedBox(height: 20),
 
           // ── Brightness ───────────────────────────────────────────────────
-          _SectionHeader(icon: Icons.brightness_6_rounded, label: 'Screen Brightness',
-              value: monitor.currentBrightness >= 0 ? '${bright.round()}%' : 'N/A',
-              color: const Color(0xFFFFD600)),
+          _SectionHeader(
+            icon: Icons.brightness_6_rounded,
+            label: 'Screen Brightness',
+            value: monitor.currentBrightness >= 0
+                ? '${bright.round()}%'
+                : 'N/A',
+            color: const Color(0xFFFFD600),
+          ),
           const SizedBox(height: 8),
           _SliderCard(
             value: bright,
             color: const Color(0xFFFFD600),
-            min: 0, max: 100,
+            min: 0,
+            max: 100,
             onChanged: (v) => setState(() => _localBrightness = v),
             onChangeEnd: (v) {
               setState(() => _localBrightness = null);
@@ -893,12 +953,24 @@ class _ControlPanelState extends State<_ControlPanel> {
           const SizedBox(height: 24),
 
           // ── Power Control ────────────────────────────────────────────────
-          Row(children: [
-            const Icon(Icons.power_settings_new_rounded, color: Color(0xFFFF6D00), size: 18),
-            const SizedBox(width: 8),
-            Text('Power Control', style: GoogleFonts.inter(
-              color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
-          ]),
+          Row(
+            children: [
+              const Icon(
+                Icons.power_settings_new_rounded,
+                color: Color(0xFFFF6D00),
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Power Control',
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
 
           // Lock
@@ -927,29 +999,43 @@ class _ControlPanelState extends State<_ControlPanel> {
             label: 'Shutdown',
             subtitle: 'Shut down PC in 5 seconds',
             color: const Color(0xFFFF1744),
-            onTap: () => _confirmPower(context, 'SHUTDOWN', 'Shutdown', monitor),
+            onTap: () =>
+                _confirmPower(context, 'SHUTDOWN', 'Shutdown', monitor),
           ),
         ],
       ),
     );
   }
 
-  void _confirmPower(BuildContext ctx, String action, String label, MonitorProvider monitor) {
+  void _confirmPower(
+    BuildContext ctx,
+    String action,
+    String label,
+    MonitorProvider monitor,
+  ) {
     showDialog(
       context: ctx,
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFF141828),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(children: [
-          Icon(
-            action == 'SHUTDOWN' ? Icons.power_off_rounded : Icons.refresh_rounded,
-            color: action == 'SHUTDOWN' ? const Color(0xFFFF1744) : const Color(0xFFFF6D00),
-            size: 22,
-          ),
-          const SizedBox(width: 8),
-          Text('Confirm $label',
-              style: const TextStyle(color: Colors.white, fontSize: 18)),
-        ]),
+        title: Row(
+          children: [
+            Icon(
+              action == 'SHUTDOWN'
+                  ? Icons.power_off_rounded
+                  : Icons.refresh_rounded,
+              color: action == 'SHUTDOWN'
+                  ? const Color(0xFFFF1744)
+                  : const Color(0xFFFF6D00),
+              size: 22,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Confirm $label',
+              style: const TextStyle(color: Colors.white, fontSize: 18),
+            ),
+          ],
+        ),
         content: Text(
           '$label the server PC in 5 seconds?',
           style: const TextStyle(color: Colors.white70, fontSize: 13),
@@ -957,21 +1043,31 @@ class _ControlPanelState extends State<_ControlPanel> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white38)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white38),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: action == 'SHUTDOWN'
                   ? const Color(0xFFFF1744)
                   : const Color(0xFFFF6D00),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
             onPressed: () {
               Navigator.pop(ctx);
               monitor.sysPower(action);
             },
-            child: Text(label,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
@@ -998,8 +1094,14 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Icon(icon, color: color, size: 16),
         const SizedBox(width: 8),
-        Text(label, style: TextStyle(color: Colors.white70, fontSize: 13,
-            fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white70,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         const Spacer(),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -1008,8 +1110,14 @@ class _SectionHeader extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: color.withOpacity(0.3)),
           ),
-          child: Text(value, style: TextStyle(
-              color: color, fontSize: 12, fontWeight: FontWeight.w700)),
+          child: Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ),
       ],
     );
@@ -1107,11 +1215,22 @@ class _PowerButton extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(label, style: TextStyle(
-                        color: color, fontSize: 14, fontWeight: FontWeight.w700)),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text(subtitle, style: const TextStyle(
-                        color: Colors.white38, fontSize: 11)),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        color: Colors.white38,
+                        fontSize: 11,
+                      ),
+                    ),
                   ],
                 ),
               ),

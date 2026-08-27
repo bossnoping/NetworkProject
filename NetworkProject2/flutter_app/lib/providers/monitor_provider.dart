@@ -23,7 +23,7 @@ class MonitorProvider extends ChangeNotifier {
   bool isConnected = false;
   bool isLoadingProcs = false;
   String? lastKillResult;
-  String? controlResult;          // last result shown on Controls page
+  String? controlResult; // last result shown on Controls page
   String serverHost = '';
   String currentSortby = 'CPU';
   int clientPingMs = -1;
@@ -34,8 +34,8 @@ class MonitorProvider extends ChangeNotifier {
   StreamSubscription<MetricData>? _udpSub;
   StreamSubscription<bool>? _connSub;
   StreamSubscription<ServerResponse>? _respSub;
-  Timer? _procRefreshTimer;   // auto-refresh process list every 2s
-  Timer? _clientPingTimer;   // client-side ping to 8.8.8.8 every 5s
+  Timer? _procRefreshTimer; // auto-refresh process list every second
+  Timer? _clientPingTimer; // client-side ping to 8.8.8.8 every 5s
 
   // ── Connect ────────────────────────────────────────────────────────────────
   Future<bool> connect(String host) async {
@@ -51,11 +51,26 @@ class MonitorProvider extends ChangeNotifier {
       // Update Home Widget (Android / iOS only — not supported on desktop)
       if (Platform.isAndroid || Platform.isIOS) {
         try {
-          await HomeWidget.saveWidgetData<String>('cpu', '${metric.cpu.toStringAsFixed(1)}%');
-          await HomeWidget.saveWidgetData<String>('ram', '${metric.ram.toStringAsFixed(1)}%');
-          await HomeWidget.saveWidgetData<String>('disk', '${metric.disk.toStringAsFixed(1)}%');
-          await HomeWidget.saveWidgetData<String>('temp', '${metric.tempCpu.toStringAsFixed(1)}°C');
-          await HomeWidget.saveWidgetData<String>('status', metric.netOnline ? 'Online' : 'Offline');
+          await HomeWidget.saveWidgetData<String>(
+            'cpu',
+            '${metric.cpu.toStringAsFixed(1)}%',
+          );
+          await HomeWidget.saveWidgetData<String>(
+            'ram',
+            '${metric.ram.toStringAsFixed(1)}%',
+          );
+          await HomeWidget.saveWidgetData<String>(
+            'disk',
+            '${metric.disk.toStringAsFixed(1)}%',
+          );
+          await HomeWidget.saveWidgetData<String>(
+            'temp',
+            '${metric.tempCpu.toStringAsFixed(1)}°C',
+          );
+          await HomeWidget.saveWidgetData<String>(
+            'status',
+            metric.netOnline ? 'Online' : 'Offline',
+          );
           await HomeWidget.updateWidget(
             androidName: 'AppWidgetProvider',
             // iOSName: 'SrmpWidget', // Un-comment if iOS is supported
@@ -90,17 +105,23 @@ class MonitorProvider extends ChangeNotifier {
         alerts.insert(0, resp.body);
         if (alerts.length > 5) alerts.removeLast();
         _log('⚠️  ALERT: ${resp.body}');
-      } else if (resp.isOk && resp.body.contains('PROC_TERMINATED')) {
+      } else if (resp.isOk && resp.body.contains('PROC_KILLED')) {
         lastKillResult = '✅ ${resp.body}';
         _log('${resp.statusCode} ${resp.phrase} - ${resp.body}');
       } else if (resp.isOk && resp.body.contains('SYSTEM_')) {
         controlResult = '✅ ${resp.body}';
         _log('🔌 ${resp.body}');
-      } else if (resp.isOk && (resp.body.startsWith('VOLUME_SET_') || resp.body.startsWith('BRIGHTNESS_SET_'))) {
+      } else if (resp.isOk &&
+          (resp.body.startsWith('VOLUME_SET_') ||
+              resp.body.startsWith('BRIGHTNESS_SET_'))) {
         controlResult = '✅ ${resp.body}';
       } else if (resp.isError) {
         final body = resp.body;
-        final isControlError = body.contains('BRIGHTNESS') || body.contains('VOLUME') || body.contains('SYSTEM') || body.contains('LOCK');
+        final isControlError =
+            body.contains('BRIGHTNESS') ||
+            body.contains('VOLUME') ||
+            body.contains('SYSTEM') ||
+            body.contains('LOCK');
         if (isControlError) {
           controlResult = '❌ $body';
         } else {
@@ -117,9 +138,9 @@ class MonitorProvider extends ChangeNotifier {
     // ── Fetch initial system settings ──────────────────────────────────
     _fetchSystemSettings();
 
-    // ── Start auto-refresh timer (every 2 seconds) ────────────────────────
+    // ── Start auto-refresh timer (every second) ───────────────────────────
     _procRefreshTimer = Timer.periodic(
-      const Duration(seconds: 2),
+      const Duration(seconds: 1),
       (_) => _silentRefreshProcesses(),
     );
 
@@ -158,7 +179,7 @@ class MonitorProvider extends ChangeNotifier {
   // ── Process Management ─────────────────────────────────────────────────────
   Future<void> refreshProcesses({String sortby = 'CPU'}) async {
     if (!isConnected) return;
-    currentSortby = sortby;   // remember for auto-refresh
+    currentSortby = sortby; // remember for auto-refresh
     isLoadingProcs = true;
     notifyListeners();
 
@@ -179,10 +200,13 @@ class MonitorProvider extends ChangeNotifier {
   }
 
   void killProcess(int pid, String name) {
-    _tcp.killProcess(name);
-    _log('KILL_PROC name=$name sent');
+    _tcp.killProcess(pid);
+    _log('KILL_PROC pid=$pid sent');
     // Refresh list after a short delay
-    Future.delayed(const Duration(milliseconds: 800), () => refreshProcesses(sortby: currentSortby));
+    Future.delayed(
+      const Duration(milliseconds: 800),
+      () => refreshProcesses(sortby: currentSortby),
+    );
   }
 
   void dismissAlert(int index) {
@@ -196,7 +220,7 @@ class MonitorProvider extends ChangeNotifier {
   void setVolume(int level) {
     _tcp.setVolume(level);
     currentVolume = level;
-    controlResult = null;  // clear while waiting for response
+    controlResult = null; // clear while waiting for response
     notifyListeners();
   }
 
