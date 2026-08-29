@@ -407,9 +407,7 @@ def handle_command(cmd_line: str):
         elif name == "brightness":
             val = get_brightness()
         else:
-            return "404 NOT_FOUND - SETTING_NOT_FOUND\n"
-        if val < 0:
-            return "404 NOT_FOUND - SETTING_NOT_FOUND\n"
+            return "404 NOT_FOUND - UNKNOWN_SETTING name=%s\n" % name
         return "200 OK - SETTING_VALUE name=%s value=%d\n" % (name, val)
 
     # ── SET_SETTING ───────────────────────────────────────────────────────
@@ -543,12 +541,16 @@ def tcp_server():
 # ══════════════════════════════════════════════════════════════════════════════
 
 def udp_broadcaster():
+    # 1. สร้าง Socket แบบ UDP (User Datagram Protocol)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # 2. ตั้งค่าให้ Socket สามารถส่งข้อมูลแบบ Broadcast ได้ (Broadcast คือการส่งข้อมูลให้ทุกเครื่องในวง Network)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     print("[UDP] Broadcasting metrics on port %d every %.1fs" % (UDP_PORT, METRIC_INTERVAL))
 
+    # 3. ดึงค่าสถิติต่างๆ จากระบบ (psutil, LibreHardwareMonitor, nvidia-smi)
     while True:
         try:
+            # psutil: ดึงค่า CPU, RAM, Disk
             cpu = psutil.cpu_percent(interval=None)
             ram = psutil.virtual_memory().percent
             disk = psutil.disk_usage("/").percent
@@ -556,7 +558,7 @@ def udp_broadcaster():
             temp_gpu = get_gpu_temp()
             net_up, net_down, online, ping = get_net_stats()
             uptime = get_uptime_secs()
-
+            # 4. ประกอบข้อความตามข้อกำหนดโปรโตคอล SRMP METRIC
             packet = (
                 "METRIC cpu=%.1f%% ram=%.1f%% disk=%.1f%%"
                 " temp_cpu=%.1fC temp_gpu=%.1fC"
@@ -570,11 +572,12 @@ def udp_broadcaster():
                 "1" if online else "0", ping,
                 uptime,
             )
+            # 5. ส่งแพ็กเก็ตไปยังที่อยู่ Broadcast บน Port 9000
             sock.sendto(packet.encode(), (UDP_BROADCAST, UDP_PORT))
             print("[UDP] %s" % packet)
         except Exception as e:
             print("[UDP] Error: %s" % e)
-
+        # 6. หน่วงเวลาตามค่า METRIC_INTERVAL (ค่าเริ่มต้นคือ 1.0 วินาที) เพื่อไม่ให้ส่งข้อมูลถี่เกินไป
         time.sleep(METRIC_INTERVAL)
 
 
@@ -615,6 +618,83 @@ def elevate_and_restart() -> bool:
         return False
 
 
+def get_host_network_info():
+    """Retrieve all local IPv4 addresses and MAC addresses of network adapters."""
+    adapters = []
+    try:
+        addrs = psutil.net_if_addrs()
+        stats = psutil.net_if_stats()
+        for iface_name, iface_addrs in addrs.items():
+            stat = stats.get(iface_name)
+            if stat and not stat.isup:
+                continue
+            ipv4 = None
+            mac = None
+            for addr in iface_addrs:
+                if addr.family == socket.AF_INET:
+                    if not addr.address.startswith("127."):
+                        ipv4 = addr.address
+                elif addr.family == psutil.AF_LINK or getattr(addr, 'family', None) == -1:
+                    mac = addr.address
+            if ipv4:
+                adapters.append((iface_name, ipv4, mac or "N/A"))
+    except Exception:
+        pass
+    if not adapters:
+        try:
+            hostname = socket.gethostname()
+            ip = socket.gethostbyname(hostname)
+            if not ip.startswith("127."):
+                adapters.append(("Default Adapter", ip, "N/A"))
+        except Exception:
+            pass
+    return adapters
+
+
+def configure_firewall():
+    """Automatically configure Windows Firewall to allow SRMP TCP 9001 and UDP 9000."""
+    try:
+        # Check and add TCP port 9001
+        subprocess.run(
+            ["netsh", "advfirewall", "firewall", "add", "rule",
+             "name=SRMP_Server_TCP_9001", "dir=in", "action=allow",
+             "protocol=TCP", "localport=9001", "profile=any"],
+            capture_output=True, text=True, timeout=5
+        )
+        # Check and add UDP port 9000
+        subprocess.run(
+            ["netsh", "advfirewall", "firewall", "add", "rule",
+             "name=SRMP_Server_UDP_9000", "dir=in", "action=allow",
+             "protocol=UDP", "localport=9000", "profile=any"],
+            capture_output=True, text=True, timeout=5
+        )
+    except Exception as e:
+        print(f"[FIREWALL] Notice: {e}")
+
+
+def print_startup_banner():
+    hostname = socket.gethostname()
+    adapters = get_host_network_info()
+
+    print("\n" + "=" * 65)
+    print(f"   🚀 SRMP SERVER RUNNING  |  Host: {hostname}")
+    print("=" * 65)
+    print("   📍 กรอก IP Address ต่อไปนี้ในแอปพลิเคชันเพื่อเชื่อมต่อ:")
+    if adapters:
+        for idx, (iface, ip, mac) in enumerate(adapters, 1):
+            print(f"      [{idx}] {ip:<15} ({iface})")
+            if mac != "N/A":
+                print(f"          └─ MAC Address: {mac} (ใช้สำหรับ Wake-on-LAN)")
+    else:
+        print("      (ตรวจไม่พบ IP ในวงเครือข่าย กรุณาตรวจสอบการเชื่อมต่อ Wi-Fi/LAN)")
+
+    print("-" * 65)
+    print(f"   📡 TCP Port (Command & Control) : {TCP_PORT}")
+    print(f"   📻 UDP Port (Metric Streaming)  : {UDP_PORT} (Broadcast ทุก {METRIC_INTERVAL}s)")
+    print("   🛡️  Windows Firewall Rules       : Auto-Configured (Allowed)")
+    print("=" * 65 + "\n")
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # Entry point
 # ══════════════════════════════════════════════════════════════════════════════
@@ -626,16 +706,22 @@ if __name__ == "__main__":
 
     print("[SRMP] Running as Administrator.")
 
+    # Configure firewall rules automatically for new PCs
+    configure_firewall()
+
     # Warm up psutil cpu_percent (first call always returns 0.0)
     psutil.cpu_percent(interval=1)
 
     threading.Thread(target=tcp_server, daemon=True).start()
     threading.Thread(target=udp_broadcaster, daemon=True).start()
 
-    print("[SRMP] Server running. Press Ctrl+C to stop.")
+    # Print clean and helpful host information for users
+    print_startup_banner()
+
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
         print("\n[SRMP] Shutting down.")
+
 

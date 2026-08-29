@@ -1,0 +1,405 @@
+import subprocess
+import os
+
+html_content = """<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ข้อเสนอการพัฒนาโปรแกรม Network Application และการออกแบบ Application-Layer Protocol (SRMP)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 15mm 20mm 15mm;
+            @bottom-right {
+                content: counter(page);
+            }
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #1e293b;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+        .header-cover {
+            border-bottom: 3px solid #0284c7;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .doc-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #0284c7, #6366f1);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 5px 0 10px 0;
+            line-height: 1.3;
+        }
+        .subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0369a1;
+            border-left: 4px solid #0284c7;
+            padding-left: 10px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        .subsection-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #334155;
+            margin-top: 14px;
+            margin-bottom: 6px;
+        }
+        p {
+            margin: 0 0 10px 0;
+            text-align: justify;
+        }
+        ul, ol {
+            margin: 0 0 12px 0;
+            padding-left: 22px;
+        }
+        li {
+            margin-bottom: 4px;
+        }
+        .card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+        }
+        .highlight-box {
+            background-color: #f0f9ff;
+            border-left: 4px solid #0284c7;
+            padding: 10px 14px;
+            border-radius: 0 6px 6px 0;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 12.5px;
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 7px 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            font-weight: 700;
+        }
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        code, pre {
+            font-family: 'Fira Code', Consolas, Monaco, monospace;
+        }
+        code {
+            background-color: #f1f5f9;
+            color: #0369a1;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        pre {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            line-height: 1.45;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+        .badge-udp {
+            background-color: #fef3c7;
+            color: #b45309;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        .badge-tcp {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-cover">
+        <span class="doc-tag">Computer Network Project Proposal</span>
+        <h1>ข้อเสนอการพัฒนาโปรแกรม Network Application<br>และการออกแบบ Application-Layer Protocol (SRMP)</h1>
+        <p class="subtitle">วิชาเครือข่ายคอมพิวเตอร์ (Computer Networks) — รายงานการออกแบบโพรโทคอลและสถาปัตยกรรมระบบ</p>
+    </div>
+
+    <!-- ส่วนที่ 1 -->
+    <div class="section-title">1. รายละเอียดและการเสนอการพัฒนาโปรแกรม Network Application</div>
+    
+    <div class="subsection-title">1.1 วัตถุประสงค์ของโปรแกรม (Program Objective & Description)</div>
+    <p>
+        โปรแกรมที่พัฒนาขึ้นมีชื่อว่า <strong>"SRMP Monitor (System Resource Monitoring Protocol Monitor)"</strong> เป็น Network Application ประเภท <strong>Real-Time Remote System Resource Monitoring & Management System</strong> ที่พัฒนาขึ้นตามสถาปัตยกรรมแบบ Client-Server เพื่อตอบสนองการบริหารจัดการและตรวจสอบสถานะคอมพิวเตอร์แม่ข่ายหรือเครื่องปลายทาง (Host PC) จากระยะไกลผ่านระบบเครือข่าย Local Area Network (LAN / Wi-Fi)
+    </p>
+    <div class="card">
+        <strong>วัตถุประสงค์และขอบเขตการทำงานหลักของโปรแกรม:</strong>
+        <ul>
+            <li><strong>การติดตามสถานะทรัพยากรฮาร์ดแวร์แบบ Real-Time (Telemetry):</strong> ดึงข้อมูลสถานะการทำงานระดับลึก ได้แก่ อัตราการใช้งาน CPU (%), RAM (%), Disk Storage (%), อุณหภูมิหน่วยประมวลผล (CPU Package Temp, GPU Temp), ความเร็วเครือข่าย Upload/Download (MB/s), สถานะการเชื่อมต่ออินเทอร์เน็ตพร้อมค่า Ping Latency และระยะเวลาเปิดเครื่อง (System Uptime)</li>
+            <li><strong>การบริหารจัดการโปรเซส (Process Management):</strong> ตรวจสอบรายการโปรเซสที่ใช้ทรัพยากรสูงสุด (Top Processes) เรียงลำดับตาม CPU หรือ RAM และสามารถสั่งยุติการทำงานของโปรเซสที่ไม่พึงประสงค์ได้ทันที (Remote Process Termination / Kill Task)</li>
+            <li><strong>การควบคุมระบบและฮาร์ดแวร์จากระยะไกล (Remote Hardware & System Control):</strong> ปรับระดับความดังของเสียง (Volume Control 0-100%), ปรับระดับความสว่างของหน้าจอ (Screen Brightness 0-100%), ล็อกหน้าจอ (Lock Screen), สั่งรีสตาร์ท (Restart) และสั่งปิดเครื่องคอมพิวเตอร์ (Shutdown) พร้อมระบบนับถอยหลังป้องกันความผิดพลาด</li>
+            <li><strong>การเปิดเครื่องระยะไกลผ่านเครือข่าย (Wake-on-LAN: WOL):</strong> รองรับการส่งสัญญาณ Magic Packet เพื่อเปิดเครื่องคอมพิวเตอร์ที่ปิดอยู่ (Power Off) ให้พร้อมทำงานจากระยะไกล</li>
+            <li><strong>ระบบแจ้งเตือนเหตุฉุกเฉิน (Push Alert Notifications):</strong> การแจ้งเตือนทันทีเมื่อตรวจพบว่าทรัพยากรของเครื่องทำงานหนักเกินเกณฑ์วิกฤต (เช่น อุณหภูมิสูงเกิน หรือ RAM เต็ม)</li>
+        </ul>
+    </div>
+
+    <div class="subsection-title">1.2 คุณลักษณะของ Application ที่พัฒนา (Application Characteristics)</div>
+    <ul>
+        <li><strong>สถาปัตยกรรมการสื่อสารแบบผสมผสาน (Dual-Layer Client-Server Model):</strong>
+            <ul>
+                <li><strong>ฝั่ง Server (Python Backend):</strong> ทำหน้าที่เป็น Service Daemon คอยเก็บข้อมูลจากระดับ Operating System (OS APIs, WMI, LibreHardwareMonitor DLL, psutil, nvidia-smi) และคอยรับคำสั่งควบคุมระบบ</li>
+                <li><strong>ฝั่ง Client (Cross-Platform Flutter App):</strong> ทำหน้าที่เป็นหน้าจอควบคุม (Interactive GUI Dashboard) รองรับทั้งสมาร์ทโฟน (Android/iOS) และคอมพิวเตอร์ พร้อมรองรับระบบ Mobile Home Widget เพื่อแสดงผลสถิติบนหน้าจอหลักของโทรศัพท์</li>
+            </ul>
+        </li>
+        <li><strong>Real-Time Data Streaming & Low Latency:</strong> ส่งข้อมูลสถิติของเครื่องอย่างต่อเนื่องทุก 1 วินาที มีความหน่วงต่ำ เพื่อให้ผู้ดูแลระบบมองเห็นสถานะปัจจุบันของเครื่องเสมือนนั่งอยู่หน้าเครื่องจริง</li>
+        <li><strong>การสื่อสารแบบสองทิศทาง (Interactive & Bidirectional Control):</strong> มีทั้งระบบ Push สตรีมข้อมูลจาก Server สู่ Client, ระบบ Request-Response ตอบสนองคำสั่งทันที และระบบ Server-Push Alert แจ้งเตือนข้อผิดพลาด</li>
+        <li><strong>ความยืดหยุ่นและการสลับเปลี่ยน Host ขณะทำงาน (Dynamic Host Switching):</strong> ผู้ใช้งานสามารถกดเปลี่ยน IP Address ของคอมพิวเตอร์เครื่องเป้าหมายบนหน้า Dashboard ได้ทันทีโดยไม่ต้องปิดหรือรีสตาร์ทแอปพลิเคชัน</li>
+        <li><strong>ความทนทานต่อข้อผิดพลาด (Fault Tolerance & Non-blocking I/O):</strong> ระบบทำงานแบบ Asynchronous I/O และ Multi-threading หากข้อมูลสถิติบางช่วงเวลาสูญหาย หน้าจอ UI จะไม่หยุดทำงานและทำการดึงข้อมูลใหม่ทันที</li>
+    </ul>
+
+    <!-- ส่วนที่ 2 Transport Layer Selection -->
+    <div class="section-title">2. การเลือกใช้ Service Model ของ Transport Layer (UDP vs TCP)</div>
+    <p>
+        ในการพัฒนาระบบ SRMP ได้เลือกใช้ <strong>สถาปัตยกรรมแบบไฮบริด (Hybrid Transport Layer Architecture)</strong> โดยแบ่งการทำงานออกเป็น 2 ท่อสัญญาณตามลักษณะความต้องการของข้อมูล (Application Requirements) ดังนี้:
+    </p>
+
+    <div class="card">
+        <div class="subsection-title"><span class="badge-udp">UDP (Port 9000)</span> 1. การเลือกใช้ UDP สำหรับ Metric Telemetry Broadcast และ Wake-on-LAN</div>
+        <p><strong>เหตุผลที่เลือกใช้ UDP (User Datagram Protocol):</strong></p>
+        <ol>
+            <li><strong>Low Overhead & Minimal Latency (ประหยัดแบนด์วิธและไม่มีความหน่วงสะสม):</strong> UDP เป็น Connectionless Protocol มี Header ขนาดเล็กเพียง 8 Bytes และไม่ต้องเสียเวลาทำ 3-Way Handshake ก่อนส่งข้อมูล จึงเหมาะกับการส่งสตรีมข้อมูลสถิติ (CPU, RAM, Temp) ที่เกิดขึ้นถี่ๆ ทุก 1 วินาที</li>
+            <li><strong>ยอมรับการสูญหายของข้อมูลได้ (Tolerate Packet Loss):</strong> ข้อมูลสถิติเป็นข้อมูลประเภท Real-Time Time-Sensitive Data หากแพ็กเก็ตของวินาทีที่ผ่านมาสูญหายไประหว่างทาง <em>ไม่มีความจำเป็นต้องส่งซ้ำ (No Retransmission)</em> เพราะข้อมูลใหม่ล่าสุดในวินาทีถัดไปจะถูกส่งมาแทนที่ทันที การส่งซ้ำของ TCP จะทำให้เกิดความหน่วงสะสมที่ไม่พึงประสงค์</li>
+            <li><strong>ความสามารถในการส่งแบบ Broadcast (1-to-Many Transmission):</strong> UDP รองรับการส่งกระจายสัญญาณแบบ <code>255.255.255.255</code> ทำให้ Server ส่งแพ็กเก็ตเพียงครั้งเดียว แต่อุปกรณ์ Client หลากหลายเครื่องในวงเครือข่ายสามารถรับฟังข้อมูลพร้อมกันได้ โดย Server ไม่ต้องสิ้นเปลืองหน่วยความจำในการเปิด Connection ค้างไว้</li>
+            <li><strong>ความเข้ากันได้กับมาตรฐาน Wake-on-LAN:</strong> การส่ง Magic Packet เพื่อเปิดเครื่องคอมพิวเตอร์ที่ปิดอยู่ ต้องส่งผ่านสัญญาณ UDP Broadcast ไปยัง Port 9 หรือ 7 เท่านั้น เพื่อให้การ์ดแลน (NIC) ตอบรับสัญญาณได้ในระดับฮาร์ดแวร์</li>
+        </ol>
+    </div>
+
+    <div class="card">
+        <div class="subsection-title"><span class="badge-tcp">TCP (Port 9001)</span> 2. การเลือกใช้ TCP สำหรับ Command & Control Channel และ Alert Notifications</div>
+        <p><strong>เหตุผลที่เลือกใช้ TCP (Transmission Control Protocol):</strong></p>
+        <ol>
+            <li><strong>Reliability & Guaranteed Delivery (การันตีว่าข้อมูลถึงปลายทางและไม่เสียหาย 100%):</strong> คำสั่งควบคุม เช่น <code>KILL_PROC</code>, <code>SYS_POWER action=SHUTDOWN</code>, <code>SET_VOL</code> เป็นคำสั่งที่มีความสำคัญสูงมาก (Critical Operations) หากข้อมูลตกหล่นจะส่งผลให้เครื่องไม่ปฏิบัติตามคำสั่ง จึงต้องพึ่งพาคุณสมบัติ Acknowledgement (ACK) และ Automatic Retransmission ของ TCP</li>
+            <li><strong>รักษาลำดับความถูกต้องของคำสั่ง (In-Order Delivery):</strong> TCP รับประกันว่าคำสั่ง Request และข้อความตอบกลับ Response (เช่น <code>200 OK</code>, <code>404 NOT_FOUND</code>) จะส่งถึงปลายทางตามลำดับอย่างถูกต้องผ่านระบบ Sequence Number</li>
+            <li><strong>Connection-Oriented & State Management:</strong> การเชื่อมต่อแบบเปิดค้างไว้ (Persistent Socket) ช่วยให้ทั้ง Client และ Server ตรวจสอบสถานะ Online/Offline ของกันและกันได้ทันที และทำให้ Server สามารถส่งข้อความเตือนฉุกเฉิน (<code>202 ALERT</code>) แบบ Server-Push กลับมายัง Client ได้โดยตรง</li>
+        </ol>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>มิติการเปรียบเทียบ</th>
+                <th>UDP Channel (Port 9000)</th>
+                <th>TCP Channel (Port 9001)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>ฟังก์ชันการทำงาน</strong></td>
+                <td>สตรีมข้อมูลสถิติ (Metrics) & Wake-on-LAN</td>
+                <td>คำสั่งควบคุม (Commands), ผลตอบกลับ (Response), แจ้งเตือน (Alerts)</td>
+            </tr>
+            <tr>
+                <td><strong>ลักษณะการเชื่อมต่อ</strong></td>
+                <td>Connectionless (ส่งทันทีโดยไม่ต้องเชื่อมต่อ)</td>
+                <td>Connection-Oriented (Three-Way Handshake)</td>
+            </tr>
+            <tr>
+                <td><strong>การรับประกันความน่าเชื่อถือ</strong></td>
+                <td>Unreliable (ไม่การันตี, ไม่มีการส่งซ้ำ)</td>
+                <td>Reliable (รับประกันข้อมูลถึงครบ 100%, มี Retransmission)</td>
+            </tr>
+            <tr>
+                <td><strong>ทิศทางและรูปแบบการส่ง</strong></td>
+                <td>One-Way Broadcast (1-to-Many)</td>
+                <td>Two-Way Interactive Unicast (Client &harr; Server)</td>
+            </tr>
+            <tr>
+                <td><strong>Overhead & Header Size</strong></td>
+                <td>ต่ำมาก (Header 8 Bytes)</td>
+                <td>ปานกลาง (Header 20 Bytes + ควบคุมสถานะท่อเชื่อมต่อ)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <!-- ส่วนที่ 3 Application-Layer Protocol Design -->
+    <div class="section-title">3. การออกแบบ Application-Layer Protocol (SRMP: System Resource Monitoring Protocol)</div>
+    
+    <div class="subsection-title">3.1 ภาพรวมของโพรโทคอล (Protocol Overview & Specification)</div>
+    <p>
+        <strong>ชื่อโพรโทคอล:</strong> <code>SRMP (System Resource Monitoring Protocol) v1.0</code><br>
+        <strong>รูปแบบข้อความ (Message Encoding):</strong> Plain-text ASCII / UTF-8 String ที่อ่านและ Debug ได้ง่าย (Human-readable & Self-describing) สิ้นสุดข้อความด้วยอักขระขึ้นบรรทัดใหม่ (<code>\n</code> หรือ <code>\r\n</code>)
+    </p>
+
+    <div class="subsection-title">3.2 โครงสร้างข้อความ UDP Metric Broadcast (Server &rarr; Clients)</div>
+    <p>Server ทำการ Broadcast ข้อมูลไปยัง Port 9000 ทุกๆ 1 วินาที โดยใช้โครงสร้าง Key-Value Pair ดังนี้:</p>
+    <pre>METRIC cpu=&lt;CPU%&gt; ram=&lt;RAM%&gt; disk=&lt;DISK%&gt; temp_cpu=&lt;TEMP_C&gt; temp_gpu=&lt;TEMP_C&gt; net_up=&lt;MB/s&gt; net_down=&lt;MB/s&gt; net_online=&lt;0|1&gt; net_ping=&lt;MS&gt; uptime=&lt;SECS&gt;\n</pre>
+    
+    <div class="card">
+        <strong>ตัวอย่างข้อความจริง (Sample Packet):</strong>
+        <pre style="margin: 5px 0 0 0; background:#1e293b; color:#38bdf8;">METRIC cpu=24.5% ram=68.2% disk=45.0% temp_cpu=58.5C temp_gpu=46.0C net_up=0.12MB/s net_down=1.45MB/s net_online=1 net_ping=18ms uptime=43200s\n</pre>
+        <p style="font-size:12px; color:#64748b; margin-top:6px; margin-bottom:0;">
+            <em>ความหมาย:</em> CPU ทำงาน 24.5%, RAM 68.2%, Disk 45.0%, ความร้อน CPU 58.5°C, ความร้อน GPU 46.0°C, ความเร็วเน็ต Up 0.12 MB/s, Down 1.45 MB/s, สถานะเน็ตออนไลน์ ปิงเฉลี่ย 18ms, เครื่องเปิดใช้งานมาแล้ว 43,200 วินาที (12 ชั่วโมง)
+        </p>
+    </div>
+
+    <div class="subsection-title">3.3 โครงสร้างคำสั่งและข้อความตอบกลับ TCP (Client &harr; Server)</div>
+    <p>การสื่อสารผ่าน TCP Port 9001 ใช้รูปแบบ <strong>Request-Response</strong> และ <strong>Server-Push</strong>:</p>
+    
+    <ul>
+        <li><strong>Request Message Syntax:</strong> <code>&lt;COMMAND_VERB&gt; [arg1=value1] [arg2=value2]...\n</code></li>
+        <li><strong>Response Message Syntax:</strong> <code>&lt;STATUS_CODE&gt; &lt;STATUS_PHRASE&gt; - &lt;RESPONSE_BODY&gt;\n</code></li>
+    </ul>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 18%;">หมวดหมู่</th>
+                <th style="width: 35%;">Request Message (Client &rarr; Server)</th>
+                <th style="width: 47%;">Response Message (Server &rarr; Client)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Process List</strong></td>
+                <td><code>GET_TOP_PROCS limit=8 sortby=CPU\n</code><br><em>(sortby รองรับ CPU หรือ RAM)</em></td>
+                <td><code>200 OK - procs=[{pid:1240,name:chrome.exe,cpu:15.2%,ram:8.4%,ram_mb:1344.2MB},...]\n</code></td>
+            </tr>
+            <tr>
+                <td><strong>Kill Process</strong></td>
+                <td><code>KILL_PROC pid=1240\n</code></td>
+                <td><code>200 OK - PROC_KILLED\n</code> หรือ<br><code>404 NOT_FOUND - PROCESS_NOT_EXIST\n</code></td>
+            </tr>
+            <tr>
+                <td><strong>Get Setting</strong></td>
+                <td><code>GET_SETTING name=volume\n</code><br><code>GET_SETTING name=brightness\n</code></td>
+                <td><code>200 OK - SETTING_VALUE name=volume value=65\n</code></td>
+            </tr>
+            <tr>
+                <td><strong>Set Volume</strong></td>
+                <td><code>SET_VOL level=75\n</code></td>
+                <td><code>200 OK - VOLUME_SET_75\n</code></td>
+            </tr>
+            <tr>
+                <td><strong>Set Brightness</strong></td>
+                <td><code>SET_BRIGHTNESS level=80\n</code></td>
+                <td><code>200 OK - BRIGHTNESS_SET_80\n</code></td>
+            </tr>
+            <tr>
+                <td><strong>System Power</strong></td>
+                <td><code>SYS_POWER action=LOCK\n</code><br><code>SYS_POWER action=RESTART\n</code><br><code>SYS_POWER action=SHUTDOWN\n</code></td>
+                <td><code>200 OK - SYSTEM_LOCKED\n</code><br><code>200 OK - SYSTEM_RESTARTING\n</code><br><code>200 OK - SYSTEM_SHUTDOWN\n</code></td>
+            </tr>
+            <tr>
+                <td><strong>Server-Push Alert</strong></td>
+                <td><em>(ส่งอัตโนมัติจาก Server เมื่อเกิดเหตุฉุกเฉิน)</em></td>
+                <td><code>202 ALERT - CPU Temperature exceeded 85C threshold\n</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="subsection-title">3.4 รหัสสถานะการทำงาน (SRMP Status Codes)</div>
+    <ul>
+        <li><code>200 OK</code>: คำสั่งได้รับการประมวลผลและทำงานสำเร็จสมบูรณ์</li>
+        <li><code>202 ALERT</code>: ข้อความแจ้งเตือนด่วนแบบ Push Notification จากเซิร์ฟเวอร์</li>
+        <li><code>400 BAD_REQUEST</code>: รูปแบบคำสั่งหรือพารามิเตอร์ไม่ถูกต้อง เช่น ค่าระดับเสียงเกิน 100</li>
+        <li><code>404 NOT_FOUND</code>: ไม่พบโปรเซสเป้าหมาย (PID) หรือการตั้งค่าที่ร้องขอ</li>
+        <li><code>500 INTERNAL_ERROR</code>: เกิดข้อผิดพลาดภายในระบบแม่ข่ายในการเรียกใช้งาน OS API</li>
+    </ul>
+
+    <div class="subsection-title">3.5 แผนผังลำดับขั้นตอนการสื่อสาร (Message Exchange Flow Diagram)</div>
+    <pre>
+ [ Client (Flutter App) ]                                     [ Server (Python Daemon) ]
+           |                                                               |
+           | ----------------- 1. UDP Broadcast Listener (Port 9000) ----- | (Listening)
+           | &lt;............... UDP Packet: METRIC cpu=24% ram=68% ......... | (Every 1 sec)
+           |                                                               |
+           | ======== 2. TCP Handshake & Connect (Port 9001) ============= |
+           | ------------------------------------------------------------&gt; | (Connection Established)
+           |                                                               |
+           | ------------------ GET_TOP_PROCS limit=8 sortby=CPU --------&gt; |
+           | &lt;----------------- 200 OK - procs=[{pid:1240,name:...}] ----- |
+           |                                                               |
+           | ------------------ SET_VOL level=75 ------------------------&gt; |
+           | &lt;----------------- 200 OK - VOLUME_SET_75 ------------------- |
+           |                                                               |
+           | ------------------ KILL_PROC pid=1240 ----------------------&gt; |
+           | &lt;----------------- 200 OK - PROC_KILLED --------------------- |
+           |                                                               |
+           | &lt;----------------- 202 ALERT - CPU Temp High (88°C) --------- | (Push Event)
+           |                                                               |
+    </pre>
+
+</body>
+</html>
+"""
+
+html_path = r"c:\Users\ADMIN\OneDrive\เดสก์ท็อป\NetworkProject2\srmp_protocol_report.html"
+pdf_path = r"c:\Users\ADMIN\OneDrive\เดสก์ท็อป\NetworkProject2\NetworkProject2_SRMP_Protocol_Report.pdf"
+
+with open(html_path, "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+print(f"HTML file created at: {html_path}")
+
+# Run Edge headless to print to PDF
+edge_cmd = [
+    r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+    "--headless",
+    "--disable-gpu",
+    "--run-all-compositor-stages-before-draw",
+    f"--print-to-pdf={pdf_path}",
+    html_path
+]
+
+try:
+    subprocess.run(edge_cmd, check=True)
+    print(f"PDF successfully generated at: {pdf_path}")
+except Exception as e:
+    print(f"Edge headless failed: {e}")

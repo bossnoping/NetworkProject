@@ -180,7 +180,7 @@ class TCPService {
       if (r.body.contains('SETTING_VALUE') &&
           r.body.contains('name=$name') &&
           !completer.isCompleted) {
-        final m = RegExp(r'value=(\d+)').firstMatch(r.body);
+        final m = RegExp(r'value=(-?\d+)').firstMatch(r.body);
         completer.complete(m != null ? int.tryParse(m.group(1)!) ?? -1 : -1);
         sub.cancel();
       } else if (r.isError && !completer.isCompleted) {

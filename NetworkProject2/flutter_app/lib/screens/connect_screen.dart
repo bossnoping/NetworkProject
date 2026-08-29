@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:udp/udp.dart';
 
 import '../providers/monitor_provider.dart';
 import 'dashboard_screen.dart';
@@ -17,39 +19,84 @@ class _ConnectScreenState extends State<ConnectScreen> {
   final _ipCtrl = TextEditingController(text: '192.168.1.');
   bool _connecting = false;
   String? _errorMsg;
+  String? _discoveredIp;
+  UDP? _discoveryUdp;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-populate with previous host if available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final prev = context.read<MonitorProvider>().serverHost;
+      if (prev.isNotEmpty && prev != '192.168.1.') {
+        _ipCtrl.text = prev;
+      }
+    });
+    _startAutoDiscovery();
+  }
+
+  Future<void> _startAutoDiscovery() async {
+    try {
+      _discoveryUdp = await UDP.bind(Endpoint.any(port: const Port(9000)));
+      _discoveryUdp?.listen((datagram) {
+        if (datagram == null) return;
+        final senderIp = datagram.address.address;
+        if (senderIp.isNotEmpty && senderIp != '127.0.0.1' && mounted) {
+          setState(() {
+            _discoveredIp = senderIp;
+          });
+        }
+      });
+    } catch (_) {
+      // Port may already be in use or unavailable; user can still type manually
+    }
+  }
+
+  Future<void> _stopAutoDiscovery() async {
+    try {
+      _discoveryUdp?.close();
+      _discoveryUdp = null;
+    } catch (_) {}
+  }
 
   @override
   void dispose() {
+    _stopAutoDiscovery();
     _ipCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _connect() async {
+  Future<void> _connect([String? targetIp]) async {
+    final provider = context.read<MonitorProvider>();
+    final nav = Navigator.of(context);
+    await _stopAutoDiscovery();
+    if (!mounted) return;
     setState(() {
       _connecting = true;
       _errorMsg = null;
     });
 
-    final host = _ipCtrl.text.trim();
-    final provider = context.read<MonitorProvider>();
+    final host = targetIp ?? _ipCtrl.text.trim();
+    if (targetIp != null) {
+      _ipCtrl.text = targetIp;
+    }
     final ok = await provider.connect(host);
 
     if (!mounted) return;
     setState(() => _connecting = false);
 
     if (ok) {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const DashboardScreen()));
+      nav.pushReplacement(MaterialPageRoute(builder: (_) => const DashboardScreen()));
     } else {
+      _startAutoDiscovery(); // Resume discovery if connection failed
       setState(
         () => _errorMsg =
             'ไม่สามารถเชื่อมต่อ $host:9001 ได้\n\n'
             '✅ ตรวจสอบ:\n'
             '• รัน python srmp_server.py บน PC แล้วหรือยัง?\n'
-            '• IP ครบไหม? เช่น 192.168.1.4 (ดูจาก server console)\n'
-            '• PC กับโทรศัพท์อยู่ WiFi เดียวกันไหม?\n'
-            '• Windows Firewall → Allow Python on port 9001',
+            '• IP ครบไหม? ดู IP ที่แสดงบนหน้าต่าง Server Console\n'
+            '• PC กับโทรศัพท์อยู่ WiFi / LAN วงเดียวกันหรือไม่?\n'
+            '• Windows Firewall ปลดบล็อกพอร์ต 9001 และ 9000 แล้วหรือยัง?',
       );
     }
   }
@@ -98,6 +145,57 @@ class _ConnectScreenState extends State<ConnectScreen> {
 
                       // IP Input
                       _IpField(controller: _ipCtrl),
+
+                      // ── Auto-Discovered Host Card ───────────────────────────
+                      if (_discoveredIp != null) ...[
+                        const SizedBox(height: 12),
+                        GestureDetector(
+                          onTap: () => _connect(_discoveredIp),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF00E676).withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: const Color(0xFF00E676).withOpacity(0.4)),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF00E676).withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.radar_rounded, color: Color(0xFF00E676), size: 16),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'ตรวจพบเซิร์ฟเวอร์ในเครือข่าย!',
+                                        style: TextStyle(
+                                          color: Color(0xFF00E676),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'IP: $_discoveredIp  •  แตะเพื่อเชื่อมต่อ',
+                                        style: const TextStyle(color: Colors.white70, fontSize: 11),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(Icons.chevron_right_rounded, color: Color(0xFF00E676), size: 18),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
 
                       if (_errorMsg != null) ...[
                         const SizedBox(height: 14),

@@ -122,15 +122,15 @@ class MonitorProvider extends ChangeNotifier {
         controlResult = '✅ ${resp.body}';
       } else if (resp.isError) {
         final body = resp.body;
-        final isControlError =
-            body.contains('BRIGHTNESS') ||
+        if (body.contains('PROC') || body.contains('PID')) {
+          lastKillResult = '❌ ${resp.phrase}: $body';
+          _log('${resp.statusCode} ${resp.phrase} - $body');
+        } else if (body.contains('BRIGHTNESS') ||
             body.contains('VOLUME') ||
             body.contains('SYSTEM') ||
-            body.contains('LOCK');
-        if (isControlError) {
+            body.contains('LOCK')) {
           controlResult = '❌ $body';
-        } else {
-          lastKillResult = '❌ ${resp.phrase}: $body';
+        } else if (!body.contains('SETTING')) {
           _log('${resp.statusCode} ${resp.phrase} - $body');
         }
       }

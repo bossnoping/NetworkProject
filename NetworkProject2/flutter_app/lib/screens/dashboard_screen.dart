@@ -512,7 +512,6 @@ class _ProcessPanel extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              _LiveBadge(), // 🔴 LIVE indicator
               const Spacer(),
 
               // Sort toggle

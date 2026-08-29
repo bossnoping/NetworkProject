@@ -55,14 +55,15 @@ class UDPService {
   /// Start listening for UDP broadcasts on port 9000.
   Future<void> start() async {
     try {
+      // 1. สร้าง Socket แบบ UDP และจอง Port 9000
       _udp = await UDP.bind(Endpoint.any(port: Port(_udpPort)));
-      // Use the udp 4.0.1 listen API
+      // 2. ใช้ .listen() เพื่อรอรับข้อมูลที่เข้ามาเรื่อยๆ (เหมือนการเปิดประตูรอรับแขก)
       _udp!.listen((datagram) {
         if (datagram == null) return;
-        final raw = String.fromCharCodes(datagram.data).trim();
-        final metric = MetricData.parse(raw);
+        final raw = String.fromCharCodes(datagram.data).trim(); // ตัดขยะหน้าหลัง
+        final metric = MetricData.parse(raw); // แปลง String เป็น Object MetricData
         if (metric != null) {
-          _controller.add(metric);
+          _controller.add(metric); // ส่งข้อมูลเข้า Stream ให้หน้า UI Dashboard ทำงานต่อ
         }
       });
     } catch (e) {
