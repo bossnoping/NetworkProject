@@ -2,8 +2,16 @@
 setlocal
 pushd "%~dp0.."
 
+:: Check for Administrative Privileges (required for direct CPU Temperature hardware sensor access)
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [SRMP] Elevating to Administrator privileges for hardware sensor access...
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process '%~f0' -Verb RunAs"
+    exit /b
+)
+
 echo ===================================================
-echo   SRMP Server - Launcher & Auto Setup
+echo   SRMP Server - Launcher & Auto Setup (Admin)
 echo ===================================================
 
 :: Check if Python is available
