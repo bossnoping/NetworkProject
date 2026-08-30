@@ -1,8 +1,6 @@
 # 🚀 SRMP Monitor — System Resource Monitoring Protocol (v1.0)
 ---
-ชื่อ ทนุธรรม ปี่แก้ว
-
-รหัส 6710450899
+### ชื่อ ทนุธรรม ปี่แก้ว รหัส 6710450899
 
 video link: https://youtu.be/xg-A95USGGc
 ---
