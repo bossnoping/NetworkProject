@@ -27,55 +27,6 @@
  │  • รับ Asynchronous Alert (202 ALERT) เมื่อเกิดความร้อนสูงผิดปกติ        │
  └──────────────────────────────────────────────────────────────────────────┘
 
-────────────────────────────────────────────────────────────────────────────────
-1. ช่องทาง UDP (Port 9000) — Telemetry Broadcast Channel
-────────────────────────────────────────────────────────────────────────────────
-• รูปแบบ: Unidirectional Broadcast (Server ──> ทุก Client บน Local Subnet)
-• ความถี่: ส่งแพ็กเก็ตออกอากาศทุกๆ 1.0 วินาที (METRIC_INTERVAL)
-• รูปแบบข้อความ (Text-Based Datagram):
-    METRIC cpu=<float>% ram=<float>% disk=<float>% temp_cpu=<float>C temp_gpu=<float>C net_up=<float>MB/s net_down=<float>MB/s net_online=<0|1> net_ping=<int>ms uptime=<int>s
-• ตัวอย่าง:
-    METRIC cpu=14.2% ram=62.5% disk=45.0% temp_cpu=54.0C temp_gpu=42.0C net_up=0.05MB/s net_down=1.20MB/s net_online=1 net_ping=15ms uptime=7420s
-
-────────────────────────────────────────────────────────────────────────────────
-2. ช่องทาง TCP (Port 9001) — Command & Control Channel
-────────────────────────────────────────────────────────────────────────────────
-• รูปแบบ: Bidirectional Connection-Oriented (Client <──> Server)
-• การแบ่งเฟรมข้อความ (Framing): Line-Delimited ASCII Text จบด้วย newline ('\\n')
-• รูปแบบคำขอ (Request Grammar):
-    <COMMAND_VERB> [param1=val1 param2=val2 ...]\n
-• รูปแบบการตอบกลับ (Response Grammar):
-    <STATUS_CODE> <STATUS_PHRASE> - <BODY>\n
-
-• ตาราง Status Codes:
-    - 200 OK              : การดำเนินการสำเร็จ พร้อมส่งข้อมูลผลลัพธ์
-    - 202 ALERT           : ข้อความแจ้งเตือนด่วนจากเซิร์ฟเวอร์ (Server-Push Alert)
-    - 400 BAD_REQUEST     : คำสั่งไม่ถูกต้อง หรือพารามิเตอร์ผิดพลาด
-    - 404 NOT_FOUND       : ไม่พบข้อมูล/Process หรือ Setting ที่ระบุ
-    - 500 INTERNAL_ERROR  : เกิดข้อผิดพลาดภายในฝั่งเซิร์ฟเวอร์
-
-• รายการคำสั่งที่รองรับ (Supported TCP Commands):
-  1) GET_TOP_PROCS limit=<N> sortby=<CPU|RAM>
-     - ตัวอย่าง Request : GET_TOP_PROCS limit=5 sortby=CPU
-     - ตัวอย่าง Response: 200 OK - procs=[{pid:1234,name:chrome.exe,cpu:15.2%,ram:8.4%,ram_mb:450.2MB},...]
-  2) GET_SETTING name=<volume|brightness>
-     - ตัวอย่าง Request : GET_SETTING name=volume
-     - ตัวอย่าง Response: 200 OK - SETTING_VALUE name=volume value=70
-  3) SET_SETTING name=<volume|brightness> value=<0-100>
-     - ตัวอย่าง Request : SET_SETTING name=volume value=80
-     - ตัวอย่าง Response: 200 OK - SETTING_UPDATED
-  4) SET_VOL level=<0-100>
-     - ตัวอย่าง Request : SET_VOL level=50
-     - ตัวอย่าง Response: 200 OK - VOLUME_SET_50
-  5) SET_BRIGHTNESS level=<0-100>
-     - ตัวอย่าง Request : SET_BRIGHTNESS level=100
-     - ตัวอย่าง Response: 200 OK - BRIGHTNESS_SET_100
-  6) KILL_PROC pid=<PID>
-     - ตัวอย่าง Request : KILL_PROC pid=5678
-     - ตัวอย่าง Response: 200 OK - PROC_KILLED
-  7) SYS_POWER action=<LOCK|SHUTDOWN|RESTART>
-     - ตัวอย่าง Request : SYS_POWER action=LOCK
-     - ตัวอย่าง Response: 200 OK - SYSTEM_LOCKED
 """
 
 import socket
@@ -103,7 +54,7 @@ _lhm_lock = threading.Lock()
 _last_cpu_temp = 42.0
 
 
-def _get_lhm_cpu_temp() -> float:
+def _get_lhm_cpu_temp() -> float: #ดึงค่าอุณหภูมิ
     """Read CPU temperatures directly from the bundled LHM .NET library."""
     global _lhm_computer
     try:
@@ -185,7 +136,7 @@ def _get_lhm_cpu_temp() -> float:
         return 0.0
 
 
-def get_cpu_temp() -> float:
+def get_cpu_temp() -> float: #ดึงค่าอุณหภูมิ
     """
     Return CPU temperature in °C using multiple fallback methods.
     If direct kernel driver access is restricted (non-admin), seamlessly
@@ -337,7 +288,7 @@ def get_uptime_secs() -> int:
     return int(time.time() - psutil.boot_time())
 
 
-def get_volume() -> int:
+def get_volume() -> int: #ดึงค่าความดังเสียง
     """Get master volume (0-100) via pycaw."""
     try:
         from pycaw.pycaw import AudioUtilities
@@ -350,7 +301,7 @@ def get_volume() -> int:
 
 
 
-def set_volume(level: int):
+def set_volume(level: int): #ตั้งค่าความดังเสียง
     """Set master volume (0-100) via pycaw."""
     try:
         from pycaw.pycaw import AudioUtilities
@@ -450,7 +401,7 @@ _clients: list = []
 _clients_lock = threading.Lock()
 
 
-def broadcast_alert(message: str):
+def broadcast_alert(message: str): #ส่งข้อความแจ้งเตือนด่วน
     """
     [Protocol Feature: Server-Push Alert]
     ส่งข้อความแจ้งเตือนด่วน (Out-of-band Notification) ไปยังทุก Client ที่ต่อ TCP อยู่
@@ -466,7 +417,7 @@ def broadcast_alert(message: str):
                 pass
 
 
-def parse_args(raw: str) -> dict:
+def parse_args(raw: str) -> dict: #แยกตัวแปร
     """
     [Protocol Parser: Parameter Lexer]
     แปลงพารามิเตอร์ของโปรโตคอลจากสตริง 'key1=value1 key2=value2' ให้อยู่ในรูป Python Dict
@@ -480,7 +431,7 @@ def parse_args(raw: str) -> dict:
     return result
 
 
-def handle_command(cmd_line: str):
+def handle_command(cmd_line: str): #ประมวลผลคำสั่ง SRMP Request จาก Client
     """
     [Protocol Core: Request Router & Handler]
     ประมวลผลคำสั่ง SRMP Request จาก Client และสร้าง SRMP Response ตามข้อกำหนดของโปรโตคอล:
@@ -633,7 +584,7 @@ def handle_command(cmd_line: str):
         return "400 BAD REQUEST - Unknown command: %s\n" % verb
 
 
-def client_thread(conn, addr):
+def client_thread(conn, addr): #จัดการการเชื่อมต่อ
     """
     [Protocol Connection Lifecycle: TCP Client Handler]
     จัดการวงจรชีวิตของการเชื่อมต่อ TCP ราย Client:
@@ -690,7 +641,7 @@ def client_thread(conn, addr):
         print("[TCP] Client disconnected: %s" % str(addr))
 
 
-def tcp_server():
+def tcp_server(): #สร้าง TCP Server Socket บน Port 9001 เพื่อรอรับการเชื่อมต่อ
     """
     [Protocol Transport: TCP Listening Socket]
     สร้าง TCP Server Socket บน Port 9001 เพื่อรอรับการเชื่อมต่อแบบ Connection-Oriented:
@@ -715,7 +666,7 @@ def tcp_server():
 # UDP Broadcaster — Telemetry Streaming Channel (Port 9000)
 # ══════════════════════════════════════════════════════════════════════════════
 
-def udp_broadcaster():
+def udp_broadcaster(): #การทำงานของช่องทางส่งข้อมูลสถานะระบบ (Telemetry Stream)
     """
     [Protocol Transport: UDP Metric Broadcast Engine]
     การทำงานของช่องทางส่งข้อมูลสถานะระบบ (Telemetry Stream):
@@ -777,7 +728,7 @@ def udp_broadcaster():
 _ctrl_handler_ref = None
 
 
-def setup_console_ctrl_handler():
+def setup_console_ctrl_handler(): #ลงทะเบียน Windows Console Control Handler เพื่อยกเลิกการทำงานของโปรเซสทันทีเมื่อปิดเทอร์มินัล
     """Register Windows Console Control Handler to instantly terminate process when terminal closes."""
     global _ctrl_handler_ref
     if sys.platform == "win32":
@@ -795,7 +746,7 @@ def setup_console_ctrl_handler():
             pass
 
 
-def cleanup_previous_instances():
+def cleanup_previous_instances(): #เพื่อให้แน่ใจว่าไม่มีอินสแตนซ์เก่าหรืออินสแตนซ์ที่ทำงานอยู่ของ srmp_server หรือพอร์ตบล็อกเกอร์ทำงานอยู่ เพื่อป้องกันการชนกันของโปรเซสเมื่อเริ่มทำงาน
     """
     Ensure no old/stray instances of srmp_server or port blockers are running.
     Prevents process collisions when starting up.
