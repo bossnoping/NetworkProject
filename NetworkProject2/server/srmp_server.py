@@ -29,6 +29,7 @@ import subprocess
 import ctypes
 import sys
 import os
+import signal
 
 TCP_PORT = 9001
 UDP_PORT = 9000
@@ -581,6 +582,61 @@ def udp_broadcaster():
         time.sleep(METRIC_INTERVAL)
 
 
+_ctrl_handler_ref = None
+
+
+def setup_console_ctrl_handler():
+    """Register Windows Console Control Handler to instantly terminate process when terminal closes."""
+    global _ctrl_handler_ref
+    if sys.platform == "win32":
+        try:
+            HandlerRoutine = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_ulong)
+
+            def console_ctrl_handler(ctrl_type):
+                # 0 = CTRL_C_EVENT, 1 = CTRL_BREAK_EVENT, 2 = CTRL_CLOSE_EVENT, 5 = CTRL_LOGOFF_EVENT, 6 = CTRL_SHUTDOWN_EVENT
+                os._exit(0)
+                return True
+
+            _ctrl_handler_ref = HandlerRoutine(console_ctrl_handler)
+            ctypes.windll.kernel32.SetConsoleCtrlHandler(_ctrl_handler_ref, True)
+        except Exception:
+            pass
+
+
+def cleanup_previous_instances():
+    """
+    Ensure no old/stray instances of srmp_server or port blockers are running.
+    Prevents process collisions when starting up.
+    """
+    current_pid = os.getpid()
+
+    # 1. Kill other python processes executing srmp_server.py
+    for proc in psutil.process_iter(["pid", "name", "cmdline"]):
+        try:
+            if proc.info["pid"] == current_pid:
+                continue
+            cmdline = proc.info.get("cmdline") or []
+            cmdline_str = " ".join(cmdline).lower()
+            if "srmp_server.py" in cmdline_str:
+                print(f"[SRMP] Terminating previous server instance (PID: {proc.info['pid']})...")
+                proc.kill()
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+
+    # 2. Release TCP_PORT (9001) if occupied by another process
+    try:
+        for conn in psutil.net_connections(kind="inet"):
+            if conn.laddr and conn.laddr.port == TCP_PORT and conn.pid and conn.pid != current_pid:
+                try:
+                    proc = psutil.Process(conn.pid)
+                    print(f"[SRMP] Port {TCP_PORT} occupied by PID {conn.pid} ({proc.name()}) - terminating...")
+                    proc.kill()
+                except Exception:
+                    pass
+    except Exception:
+        pass
+
+
 def is_admin() -> bool:
     """Return True if the current process has administrator privileges."""
     try:
@@ -590,32 +646,22 @@ def is_admin() -> bool:
 
 
 def elevate_and_restart() -> bool:
-    """
-    Re-launch this script with UAC elevation (runas) and exit the current process.
-    Returns True if elevation was successfully triggered (caller should exit).
-    Returns False if UAC could not be shown (non-interactive context) — caller should continue.
-    """
+    """Re-launch this script with UAC elevation (runas) and exit the current process."""
     script = os.path.abspath(__file__)
     python = sys.executable
     params = f'"{script}"' + ((' ' + ' '.join(f'"{a}"' for a in sys.argv[1:])) if sys.argv[1:] else '')
-    print("[SRMP] Not running as admin. Requesting elevation...")
+    print("[SRMP] Elevating privileges via UAC prompt...")
     ret = ctypes.windll.shell32.ShellExecuteW(
-        None,       # hwnd
-        "runas",    # verb  — triggers UAC prompt
-        python,     # file
-        params,     # parameters
-        None,       # working directory (inherit)
-        1,          # SW_SHOWNORMAL
+        None,
+        "runas",
+        python,
+        params,
+        None,
+        1,
     )
     if ret > 32:
-        # UAC prompt shown, elevated process is launching — exit this one
         sys.exit(0)
-    else:
-        # code 5 = ERROR_ACCESS_DENIED (non-interactive / no desktop)
-        # Fall through and run without elevation rather than crash
-        print(f"[SRMP] UAC elevation not available (code {ret}) — continuing without admin privileges.")
-        print("[SRMP] TIP: Right-click your terminal and choose 'Run as Administrator' for full access.")
-        return False
+    return False
 
 
 def get_host_network_info():
@@ -700,14 +746,27 @@ def print_startup_banner():
 # ══════════════════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
-    # ── Ensure we are running as Administrator ──────────────────────────────
-    if not is_admin():
+    # 1. Setup instant terminal exit handlers (closes process immediately when terminal closes)
+    setup_console_ctrl_handler()
+    try:
+        signal.signal(signal.SIGINT, lambda s, f: os._exit(0))
+        signal.signal(signal.SIGTERM, lambda s, f: os._exit(0))
+    except Exception:
+        pass
+
+    # 2. Kill any old/stray instances so processes never collide
+    cleanup_previous_instances()
+
+    # 3. Explicit elevation only if requested via --elevate flag
+    if "--elevate" in sys.argv and not is_admin():
         elevate_and_restart()
 
-    print("[SRMP] Running as Administrator.")
-
-    # Configure firewall rules automatically for new PCs
-    configure_firewall()
+    # 4. Check admin permissions (stays attached to terminal)
+    if is_admin():
+        print("[SRMP] Running with Administrator privileges.")
+        configure_firewall()
+    else:
+        print("[SRMP] Running in terminal mode (Standard Privileges).")
 
     # Warm up psutil cpu_percent (first call always returns 0.0)
     psutil.cpu_percent(interval=1)
@@ -721,7 +780,8 @@ if __name__ == "__main__":
     try:
         while True:
             time.sleep(1)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, SystemExit):
         print("\n[SRMP] Shutting down.")
+        os._exit(0)
 
 

@@ -198,7 +198,6 @@ html_content = """<!DOCTYPE html>
         </li>
         <li><strong>Real-Time Data Streaming & Low Latency:</strong> ส่งข้อมูลสถิติของเครื่องอย่างต่อเนื่องทุก 1 วินาที มีความหน่วงต่ำ เพื่อให้ผู้ดูแลระบบมองเห็นสถานะปัจจุบันของเครื่องเสมือนนั่งอยู่หน้าเครื่องจริง</li>
         <li><strong>การสื่อสารแบบสองทิศทาง (Interactive & Bidirectional Control):</strong> มีทั้งระบบ Push สตรีมข้อมูลจาก Server สู่ Client, ระบบ Request-Response ตอบสนองคำสั่งทันที และระบบ Server-Push Alert แจ้งเตือนข้อผิดพลาด</li>
-        <li><strong>ความยืดหยุ่นและการสลับเปลี่ยน Host ขณะทำงาน (Dynamic Host Switching):</strong> ผู้ใช้งานสามารถกดเปลี่ยน IP Address ของคอมพิวเตอร์เครื่องเป้าหมายบนหน้า Dashboard ได้ทันทีโดยไม่ต้องปิดหรือรีสตาร์ทแอปพลิเคชัน</li>
         <li><strong>ความทนทานต่อข้อผิดพลาด (Fault Tolerance & Non-blocking I/O):</strong> ระบบทำงานแบบ Asynchronous I/O และ Multi-threading หากข้อมูลสถิติบางช่วงเวลาสูญหาย หน้าจอ UI จะไม่หยุดทำงานและทำการดึงข้อมูลใหม่ทันที</li>
     </ul>
 
@@ -278,14 +277,18 @@ html_content = """<!DOCTYPE html>
     </p>
 
     <div class="subsection-title">3.2 โครงสร้างข้อความ UDP Metric Broadcast (Server &rarr; Clients)</div>
-    <p>Server ทำการ Broadcast ข้อมูลไปยัง Port 9000 ทุกๆ 1 วินาที โดยใช้โครงสร้าง Key-Value Pair ดังนี้:</p>
-    <pre>METRIC cpu=&lt;CPU%&gt; ram=&lt;RAM%&gt; disk=&lt;DISK%&gt; temp_cpu=&lt;TEMP_C&gt; temp_gpu=&lt;TEMP_C&gt; net_up=&lt;MB/s&gt; net_down=&lt;MB/s&gt; net_online=&lt;0|1&gt; net_ping=&lt;MS&gt; uptime=&lt;SECS&gt;\n</pre>
+    <p>Server ทำการ Broadcast ข้อมูลไปยัง Port 9000 ทุกๆ 1 วินาที โดยส่งเป็นข้อความแบบ Plain-Text (Key-Value Pair) ดังนี้:</p>
+    <p style="margin: 8px 0; font-size: 13px; line-height: 1.6; color: #0f172a; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+        <strong>รูปแบบข้อความ:</strong> METRIC cpu=&lt;CPU%&gt; ram=&lt;RAM%&gt; disk=&lt;DISK%&gt; temp_cpu=&lt;TEMP_C&gt; temp_gpu=&lt;TEMP_C&gt; net_up=&lt;MB/s&gt; net_down=&lt;MB/s&gt; net_online=&lt;0|1&gt; net_ping=&lt;MS&gt; uptime=&lt;SECS&gt;\n
+    </p>
     
     <div class="card">
-        <strong>ตัวอย่างข้อความจริง (Sample Packet):</strong>
-        <pre style="margin: 5px 0 0 0; background:#1e293b; color:#38bdf8;">METRIC cpu=24.5% ram=68.2% disk=45.0% temp_cpu=58.5C temp_gpu=46.0C net_up=0.12MB/s net_down=1.45MB/s net_online=1 net_ping=18ms uptime=43200s\n</pre>
-        <p style="font-size:12px; color:#64748b; margin-top:6px; margin-bottom:0;">
-            <em>ความหมาย:</em> CPU ทำงาน 24.5%, RAM 68.2%, Disk 45.0%, ความร้อน CPU 58.5°C, ความร้อน GPU 46.0°C, ความเร็วเน็ต Up 0.12 MB/s, Down 1.45 MB/s, สถานะเน็ตออนไลน์ ปิงเฉลี่ย 18ms, เครื่องเปิดใช้งานมาแล้ว 43,200 วินาที (12 ชั่วโมง)
+        <p style="margin: 0 0 6px 0;"><strong>ตัวอย่างข้อความที่ส่งจริง:</strong></p>
+        <p style="margin: 0 0 8px 0; color: #0369a1; font-weight: 600;">
+            METRIC cpu=24.5% ram=68.2% disk=45.0% temp_cpu=58.5C temp_gpu=46.0C net_up=0.12MB/s net_down=1.45MB/s net_online=1 net_ping=18ms uptime=43200s\n
+        </p>
+        <p style="font-size:12.5px; color:#475569; margin:0;">
+            <em>ความหมายของข้อมูล:</em> CPU ทำงาน 24.5%, RAM 68.2%, Disk 45.0%, ความร้อน CPU 58.5°C, ความร้อน GPU 46.0°C, ความเร็วเน็ต Up 0.12 MB/s, Down 1.45 MB/s, สถานะเน็ตออนไลน์ ปิงเฉลี่ย 18ms, เครื่องเปิดใช้งานมาแล้ว 43,200 วินาที (12 ชั่วโมง)
         </p>
     </div>
 

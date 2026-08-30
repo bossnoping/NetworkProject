@@ -15,6 +15,10 @@ import socket
 import threading
 import time
 import random
+import os
+import sys
+import ctypes
+import signal
 from datetime import datetime
 
 
@@ -332,7 +336,34 @@ def udp_broadcaster():
 # Entry Point
 # ══════════════════════════════════════════════════════════════════════════════
 
+_ctrl_handler_ref = None
+
+
+def setup_console_ctrl_handler():
+    """Register Windows Console Control Handler to instantly terminate process when terminal closes."""
+    global _ctrl_handler_ref
+    if sys.platform == "win32":
+        try:
+            HandlerRoutine = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_ulong)
+
+            def console_ctrl_handler(ctrl_type):
+                os._exit(0)
+                return True
+
+            _ctrl_handler_ref = HandlerRoutine(console_ctrl_handler)
+            ctypes.windll.kernel32.SetConsoleCtrlHandler(_ctrl_handler_ref, True)
+        except Exception:
+            pass
+
+
 if __name__ == "__main__":
+    setup_console_ctrl_handler()
+    try:
+        signal.signal(signal.SIGINT, lambda s, f: os._exit(0))
+        signal.signal(signal.SIGTERM, lambda s, f: os._exit(0))
+    except Exception:
+        pass
+
     print("\n" + "═" * 68)
     print(f"  {BOLD}{CYAN}SRMP Demo Server v1.0{RESET}  —  System Resource Monitoring Protocol")
     print("═" * 68)
@@ -342,7 +373,7 @@ if __name__ == "__main__":
     print(f"  {YELLOW}Format:  {RESET}  <STATUS_CODE> <STATUS_PHRASE> - <BODY>\\n")
     print(f"  {YELLOW}Mode:    {RESET}  Simulated Hardware (Demo — ไม่ต้องลง psutil/WMI)")
     print("═" * 68)
-    print(f"  {DIM}กด Ctrl+C เพื่อหยุด{RESET}\n")
+    print(f"  {DIM}กด Ctrl+C หรือปิดหน้าต่าง Terminal เพื่อหยุดทำงาน{RESET}\n")
 
     threading.Thread(target=tcp_server,     daemon=True).start()
     threading.Thread(target=udp_broadcaster, daemon=True).start()
@@ -350,5 +381,6 @@ if __name__ == "__main__":
     try:
         while True:
             time.sleep(1)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, SystemExit):
         print(f"\n{YELLOW}[SERVER] หยุดทำงาน...{RESET}\n")
+        os._exit(0)

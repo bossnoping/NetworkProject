@@ -24,8 +24,14 @@ if not exist ".venv\Scripts\python.exe" (
     echo [SETUP] Dependencies installed successfully!
 )
 
+:: Release port 9001 if previously occupied by a stale process
+for /f "tokens=5" %%a in ('netstat -aon 2^>nul ^| findstr ":9001" ^| findstr "LISTENING"') do (
+    echo [SRMP] Releasing port 9001 from PID %%a...
+    taskkill /F /PID %%a >nul 2>&1
+)
+
 echo [SRMP] Starting SRMP Server...
-call .venv\Scripts\python server\srmp_server.py %*
+.venv\Scripts\python.exe server\srmp_server.py %*
 
 popd
 
