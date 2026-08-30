@@ -1,5 +1,11 @@
 # 🚀 SRMP Monitor — System Resource Monitoring Protocol (v1.0)
+---
+ชื่อ ทนุธรรม ปี่แก้ว
 
+รหัส 6710450899
+
+video link: https://youtu.be/xg-A95USGGc
+---
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev/)
 [![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev/)
